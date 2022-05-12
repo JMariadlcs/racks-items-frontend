@@ -1,0 +1,198 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Sacramento&display=swap');
+
+:root {
+  /* --neon-color: #510CEF; */
+  --neon-color: #BC13FE;
+}
+
+
+.neon {
+  margin: 0;
+  text-shadow:
+    0 0 2px #FFF,
+    0 0 4px #FFF,
+    0 0 6px #FFF,
+    0 0 15px var(--neon-color),
+    0 0 23px var(--neon-color),
+    0 0 36px var(--neon-color),
+    0 0 42px var(--neon-color),
+    0 0 67px var(--neon-color);
+ 
+  animation: pulsate 1.5s infinite alternate;
+}
+
+@keyframes pulsate {
+  0% {
+    text-shadow:
+      0 0 2px #FFF,
+      0 0 4px #FFF,
+      0 0 6px #FFF,
+      0 0 15px var(--neon-color),
+      0 0 23px var(--neon-color),
+      0 0 36px var(--neon-color),
+      0 0 42px var(--neon-color),
+      0 0 67px var(--neon-color);
+  }
+
+  100% {
+    text-shadow:
+      0 0 5px #FFF,
+      0 0 9px #FFF,
+      0 0 18px #FFF,
+      0 0 36px var(--neon-color),
+      0 0 49px var(--neon-color),
+      0 0 65px var(--neon-color),
+      0 0 89px var(--neon-color),
+      0 0 140px var(--neon-color);
+  }
+
+ 
+}
+ .presentacion{
+    background-image: url(../public/fondo2.jpg);
+    
+    height: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+
+  }
+
+  :root {
+    --clr-neon: hsl(317 100% 54%);
+    --clr-bg: hsl(323 21% 16%);
+    --clr-neon-blue:hsla(195, 100%, 52%, 1)
+  }
+  
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  
+
+  
+  .docs {
+    
+    display: inline-block;
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--clr-neon-blue);
+    border: var(--clr-neon-blue) 0.125em solid;
+    padding: 0.25em 1em;
+    border-radius: 0.25em;
+  
+    text-shadow: 0 0 0.125em hsl(0 0% 100% / 0.3), 0 0 0.45em currentColor;
+  
+    box-shadow: inset 0 0 0.5em 0 var(--clr-neon-blue), 0 0 0.5em 0 var(--clr-neon-blue);
+  
+    position: relative;
+  }
+  
+  .docs::before {
+    pointer-events: none;
+    content: "";
+    position: absolute;
+    background: var(--clr-neon-blue);
+    
+  
+    transform: perspective(1em) rotateX(40deg) scale(1, 0.35);
+    filter: blur(1em);
+    opacity: 0.7;
+  }
+  
+  .docs::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    box-shadow: 0 0 2em 0.5em var(--clr-neon-blue);
+    opacity: 0;
+    background-color: var(--clr-neon-blue);
+    z-index: -1;
+    transition: opacity 100ms linear;
+  }
+  
+  .docs:hover,
+  .docs:focus {
+    color: var(--clr-bg);
+    text-shadow: none;
+  }
+  
+  .docs:hover::before,
+  .docs:focus::before {
+    opacity: 1;
+  }
+  .docs:hover::after,
+  .docs:focus::after {
+    opacity: 1;
+  }
+
+  
+  .go {
+    
+    display: inline-block;
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--clr-neon);
+    border: var(--clr-neon) 0.125em solid;
+    padding: 0.25em 1em;
+    border-radius: 0.25em;
+  
+    text-shadow: 0 0 0.125em hsl(0 0% 100% / 0.3), 0 0 0.45em currentColor;
+  
+    box-shadow: inset 0 0 0.5em 0 var(--clr-neon), 0 0 0.5em 0 var(--clr-neon);
+  
+    position: relative;
+  }
+  
+  .go::before {
+    pointer-events: none;
+    content: "";
+    position: absolute;
+    background: var(--clr-neon);
+
+  
+    transform: perspective(1em) rotateX(40deg) scale(1, 0.35);
+    filter: blur(1em);
+    opacity: 0.7;
+  }
+  
+  .go::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    box-shadow: 0 0 2em 0.5em var(--clr-neon);
+    opacity: 0;
+    background-color: var(--clr-neon);
+    z-index: -1;
+    transition: opacity 100ms linear;
+  }
+  
+  .go:hover,
+  .go:focus {
+    color: var(--clr-bg);
+    text-shadow: none;
+  }
+  
+  .go:hover::before,
+  .go:focus::before {
+    opacity: 1;
+  }
+  .go:hover::after,
+  .go:focus::after {
+    opacity: 1;
+  }
+  
+  
+
+
