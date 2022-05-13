@@ -13,7 +13,7 @@ export default function Document() {
         <link href="https://fonts.googleapis.com/css2?family=Mandali&family=Poppins:wght@400;600;700&family=Whisper&display=swap" rel="stylesheet"/>
 
       </Head>
-      <body className=" bg-main text-secondary scroll-smooth">
+      <body className=" bg-main  text-secondary scroll-smooth">
       
 
         <Main />

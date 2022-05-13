@@ -30,12 +30,16 @@ export default function Home() {
           </button>
           </Link>
         </div>
+        <div className='bg-red/30 p-4 mt-16 w-70 h-70'>Atencion! Este es un prototipo para testeo desplegando 
+        en la testnet Mumbai de Polygon.
+
+        </div>
   
    
 
       </div>
-      <footer className='bg-main/30 border-t border-secondary w-full h-36 backdrop-blur-sm'>
-        
+      <footer className='bg-soft/30 border-t  w-full h-36 backdrop-blur-sm'>
+
       </footer>
       
     </div>

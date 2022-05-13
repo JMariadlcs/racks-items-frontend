@@ -1,7 +1,10 @@
 import '../styles/globals.css'
 import Link from 'next/link'
 import Image from 'next/Image';
+import { useEffect, useState } from 'react'
+import Sidebar from './components/Sidebar';
 function MyApp({ Component, pageProps }) {
+  
   return (
   <div>
     <header className='px-8 py-4 border-b border-secondary'>
@@ -15,8 +18,9 @@ function MyApp({ Component, pageProps }) {
 
       </nav>
     </header>
+   
+      <Component {...pageProps} />
 
-  <Component {...pageProps} />
  
   </div> 
   )
