@@ -205,3 +205,121 @@
  .ticker-red{
   box-shadow: 0 0 2em 0.2em var(--clr--neon-red);
  }
+
+
+ /*  */
+ /*  */
+ /*  */
+
+
+
+
+
+.slideshow {
+	margin: 0 auto;
+	padding-top: 50px;
+	height: 600px;
+	width: 300px;
+
+	box-sizing: border-box;
+}
+
+
+
+
+.entire-content {
+	margin-left:660px;
+	width: 190px;
+	perspective: 50000px;
+
+	padding-top: 80px;
+}
+
+.content-carrousel {
+	width: 100%;
+	
+	float: right;
+	animation: rotar 3s infinite linear;
+	transform-style: preserve-3d;
+}
+
+/* .content-carrousel:hover {
+	animation-play-state: paused;
+	cursor: pointer;
+
+  OJOOOOOO esto viene bien para cuando queramos parar el carrusel
+} */
+
+.content-carrousel figure {
+	width: 100%;
+	height: 120px;
+	border: 1px solid #3b444b;
+	overflow: hidden;
+	position: absolute;
+  z-index:0;
+}
+
+.content-carrousel figure:nth-child(1) {
+	transform: rotateY(0deg) translateZ(300px); 
+} .content-carrousel figure:nth-child(2) {
+	transform: rotateY(40deg) translateZ(300px); 
+} .content-carrousel figure:nth-child(3) {
+	transform: rotateY(80deg) translateZ(300px); 
+} .content-carrousel figure:nth-child(4) {
+	transform: rotateY(120deg) translateZ(300px); 
+} .content-carrousel figure:nth-child(5) {
+	transform: rotateY(160deg) translateZ(300px); 
+} .content-carrousel figure:nth-child(6) {
+	transform: rotateY(200deg) translateZ(300px); 
+} .content-carrousel figure:nth-child(7) {
+	transform: rotateY(240deg) translateZ(300px); 
+} .content-carrousel figure:nth-child(8) {
+	transform: rotateY(280deg) translateZ(300px); 
+} .content-carrousel figure:nth-child(9) {
+	transform: rotateY(320deg) translateZ(300px); 
+} .content-carrousel figure:nth-child(10) {
+	transform: rotateY(360deg) translateZ(300px); 
+} 
+
+
+.content-carrousel img {
+	image-rendering: auto;
+	transition: all 300ms;
+	
+}
+
+
+
+@keyframes rotar {
+	from {
+		transform: rotateY(0deg);
+	} to {
+		transform: rotateY(360deg);
+	}
+}
+.marco{
+  top:170px;
+  left: 405px;
+	border-top: 40px solid #111827;
+  border-bottom : 40px solid #111827;
+  border-left: 170px solid #111827;
+  border-right: 170px solid #111827 ;
+
+
+	height: 200px;
+	width: 800px;
+ z-index: 99;
+}
+.item1{
+  height:100%;
+  width: 50%;
+  border: 1px solid black;
+}
+.item2{
+
+    height:100%;
+    width: 50%;
+    border: 1px solid black;
+  
+  
+}
