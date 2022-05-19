@@ -9,7 +9,7 @@ export default function Home() {
       <div className='w-full pb-96 backdrop-blur-sm pt-36  flex flex-col items-center p-8  h-96 bg-main/70 rounded'>
         <div className='flex  space-x-1 items-center mb-8'>
           <Image src="/racks.png" width="200" height="70" />
-          <p className='neon font-whisper text-4xl'>Skins</p>
+          <p className='neon font-whisper text-4xl'>Items</p>
           
          
           </div>
