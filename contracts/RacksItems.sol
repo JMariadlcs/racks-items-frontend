@@ -58,7 +58,6 @@ contract RacksItems is IRacksItems, ERC1155, AccessControl, VRFConsumerBaseV2 { 
   mapping(address => bool) private s_gotRacksMembers;
   mapping(uint => uint) private s_maxSupply;
   mapping (uint256 => string) private s_uris; 
-  mapping(address => uint) private _racksBalances;
 
   /// @notice Events
   event RacksTrackMinted(uint baseItemId, uint rackstrackItemId);
@@ -177,7 +176,7 @@ contract RacksItems is IRacksItems, ERC1155, AccessControl, VRFConsumerBaseV2 { 
 
   function openCase() public contractIsActive onlyVIP{ 
     
-    racksToken.transferFrom(msg.sender, address(this), amount);
+    racksToken.transferFrom(msg.sender, address(this), casePrice);
     uint256 randomNumber = _randomNumber() % s_maxTotalSupply; // Get Random Number between 0 and totalSupply
     uint256 totalCount = 0;
     uint256 item;
@@ -260,7 +259,7 @@ contract RacksItems is IRacksItems, ERC1155, AccessControl, VRFConsumerBaseV2 { 
 
   function buyItem(uint marketItemId) public payable{
     itemOnSale item = _marketItems[marketItemId];
-     racksToken.transferFrom(msg.sender, address(this), amount);
+     racksToken.transferFrom(msg.sender, address(this),item.price);
     _safeTransferFrom(address(this), msg.sender, item.tokenId, 1 ,"");
     payable(item.seller).transfer(msg.value);
     item.sold = true;
