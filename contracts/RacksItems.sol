@@ -168,11 +168,7 @@ contract RacksItems is IRacksItems, ERC1155, AccessControl, VRFConsumerBaseV2 { 
   *   - If it is a RacksTrack -> mint ERC721 to users wallet
   */
 
-  function depositRacksToken(uint amount) public {
-    racksToken.transferFrom(msg.sender, address(this), amount);
-    _racksBalances[msg.sender]+=amount;
 
-  }
 
   function racksTokenBalanceof(address owner) public view returns(uint){
     return _racksBalances[owner];
@@ -180,8 +176,8 @@ contract RacksItems is IRacksItems, ERC1155, AccessControl, VRFConsumerBaseV2 { 
 
 
   function openCase() public contractIsActive onlyVIP{ 
-    require(_racksBalances[msg.sender]>=casePrice, "Insufficient funds.");
-    _racksBalances[msg.sender]-=casePrice;
+    
+    racksToken.transferFrom(msg.sender, address(this), amount);
     uint256 randomNumber = _randomNumber() % s_maxTotalSupply; // Get Random Number between 0 and totalSupply
     uint256 totalCount = 0;
     uint256 item;
@@ -255,15 +251,16 @@ contract RacksItems is IRacksItems, ERC1155, AccessControl, VRFConsumerBaseV2 { 
   function exchangeItem(uint tokenId) public{
     require(balanceOf(msg.sender, tokenId)>0);
      _burn(msg.sender, tokenId, 1);
+     s_maxSupply[tokenId]-=1;
      bool _racksTrack;
-    s_maxSupply[tokenID]==0? _racksTrack=true : false;
+      s_maxSupply[tokenID]==0? _racksTrack=true : false;
      emit itemExchanged(msg.sender, tokenId, _racksTrack);
 
   }
 
   function buyItem(uint marketItemId) public payable{
     itemOnSale item = _marketItems[marketItemId];
-    require(msg.value == item.price);
+     racksToken.transferFrom(msg.sender, address(this), amount);
     _safeTransferFrom(address(this), msg.sender, item.tokenId, 1 ,"");
     payable(item.seller).transfer(msg.value);
     item.sold = true;
