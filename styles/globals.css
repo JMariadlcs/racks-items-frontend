@@ -61,6 +61,14 @@
     background-size: cover;
 
   }
+  .open{
+    background-image: url(../public/fondo1.jpg);
+    
+    height: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
 
   :root {
     --clr-neon: hsl(317 100% 54%);

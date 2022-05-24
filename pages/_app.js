@@ -11,7 +11,7 @@ function MyApp({ Component, pageProps }) {
       <nav className='flex justify-between items-center'>
         <Link href="/">
           <a className='flex space-x-2  items-center'>
-            <Image src="/racks.png" width="120" height="45" />
+            <Image src="/logo.png" width="120" height="45" />
             <p className='neon font-whisper text-4xl'>Items</p>
           </a>
         </Link>

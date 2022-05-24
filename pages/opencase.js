@@ -1,35 +1,98 @@
-import React from 'react'
-import Image from 'next/image'
-import Sidebar from './components/Sidebar'
+import { ethers } from 'ethers'
+import { useEffect, useState } from 'react'
+import axios from 'axios'
+import Web3Modal from 'web3modal'
+import Sidebar from "./components/Sidebar"
+import Item from "./components/Item"
+import Image from "next"
+import Owneditem from './components/Owneditem'
+import {
+  commerceAddress
+} from '../config'
+
+import TokenizedCommerce from '../build/contracts/TokenizedCommerce.json'
 export default function opencase() {
+
+  const itemList=[
+    {
+      name:"Guantes",
+      imageSrc:"/items/guante.png",
+      ticker:"ticker-blue"
+    },
+    {
+      name:"Camiseta",
+      imageSrc:"/items/camiseta.png",
+      ticker: "ticker-blue"
+    },
+    {
+      name:"Sudadera",
+      imageSrc:"/items/sudadera.png",
+      ticker: "ticker-pink"
+    },
+    {
+      name:"Chamarrón",
+      imageSrc:"/items/napa.png",
+      ticker: "ticker-pink"
+    },
+    {
+      name:"Zapatos",
+      imageSrc:"/items/shoe.png",
+      ticker: "ticker-red"
+    },
+    {
+      name:"Watch",
+      imageSrc:"/items/reloj.png",
+      ticker: "ticker-red"
+    },
+
+
+
+  ]
+
+
+  async function openCase() {
+    /* needs the user to sign the transaction, so will use Web3Provider and sign it */
+    const web3Modal = new Web3Modal()
+    const connection = await web3Modal.connect()
+    const provider = new ethers.providers.Web3Provider(connection)
+    const signer = provider.getSigner()
+    const account = await signer.getAddress()
+    const contract = new ethers.Contract(commerceAddress,TokenizedCommerce.abi, signer)
+
+    /* user will be prompted to pay the asking proces to complete the transaction */
+    const openPrice = await contract.casePrice()
+    const price = openPrice.toString()
+    
+    const transaction = await contract.openCase({
+      value: price
+    })
+
+    await transaction.wait()
+    contract.on("CaseOpened", (user, casePrice, item) => {
+      let gotItem = item.toNumber();
+      alert(`Te ha tocado ${itemList[gotItem].name}`)
+
+  });
+    
+
+
+  
+
+  }
   return (
     <div className='flex'>
         <Sidebar/>
-        <div className='flex absolute  justify-center marco items-center'>
-          <div className='item1'>
-
+        <div className='flex justify-center items-center h-full w-full open'>
+        
+          <div className='flex px-96 w-full justify-between items-center backdrop-blur-sm bg-main/30'>
+              <button  onClick={()=>openCase()} className='go p-8 text-xl mx-86 mt-36 mb-96'>ABRIR</button>
           </div>
-          <div className='item2'></div>
 
-           </div>
-        <div className='flex justify-center'>
-        <section className="slideshow bg-main">
-            <div className='entire-content'>
-                <div className="content-carrousel ">
-                     <figure className='flex justify-center items-center shadow bg-secondary ticker-red'><Image width="100" height="100" src="/reloj.png"/></figure>
-                     <figure className='flex justify-center items-center shadow bg-secondary ticker-pink'><Image width="100" height="100" src="/napa.png"/></figure>
-                     <figure className='flex justify-center items-center shadow bg-secondary ticker-blue'><Image width="100" height="100" src="/guante.png"/></figure>
-                     <figure className='flex justify-center items-center shadow bg-secondary ticker-red'><Image width="100" height="100" src="/reloj.png"/></figure>
-                     <figure className='flex justify-center items-center shadow bg-secondary ticker-pink'><Image width="100" height="100" src="/napa.png"/></figure>
-                     <figure className='flex justify-center items-center shadow bg-secondary ticker-blue'><Image width="100" height="100" src="/guante.png"/></figure>
-                        <figure className='flex justify-center items-center shadow bg-secondary ticker-red'><Image width="100" height="100" src="/reloj.png"/></figure>
-                        <figure className='flex justify-center items-center shadow bg-secondary ticker-pink'><Image width="100" height="100" src="/napa.png"/></figure>
-                        <figure className='flex justify-center items-center shadow bg-secondary ticker-blue'><Image width="100" height="100" src="/guante.png"/></figure>
-                      
-                </div>    
-            </div>
-        </section>
+          
+         
+
         </div>
+       
     </div>
   )
 }
