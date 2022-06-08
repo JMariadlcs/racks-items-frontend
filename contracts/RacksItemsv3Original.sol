@@ -534,8 +534,31 @@ contract RacksItemsv3 is IRacksItemsOriginal , ERC1155, ERC1155Holder, AccessCon
       :0 ;
 
       if(ownerOrSpender==2){
+        for(uint i =0; i<_tickets.length; i++){
+          if(_tickets[i].spender==user && _tickets[i].numTries!=0 && getTicketDurationLeft(i)!=0){
+            ticket=i;
+            break;
+          }
+        }
+      }else if(ownerOrSpender==3){
+        for(uint i =0; i<_tickets.length; i++){
+          if(_tickets[i].owner==user && _tickets[i].numTries!=0 && getTicketDurationLeft(i)!=0){
+            ticket=i;
+            break;
+          }
+        }
+
+      }else if(ownerOrSpender==4){
+         for(uint i =0; i<_tickets.length; i++){
+          if(_tickets[i].owner==user && _tickets[i].isAvaliable){
+            ticket=i;
+            break;
+          }
+        }
+      
         
       }
+      return (ticket, ownerOrSpender);
 
 
   }

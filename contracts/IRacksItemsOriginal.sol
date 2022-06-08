@@ -25,6 +25,7 @@ interface IRacksItemsOriginal {
     uint256 duration;
     uint256 price;
     address owner;
+    address spender;
     uint256 timeWhenSold;
     bool isAvaliable;
   }
