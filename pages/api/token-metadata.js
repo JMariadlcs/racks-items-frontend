@@ -1,5 +1,5 @@
-
+import { itemList } from "../../itemlist"
 export default function handler(req,res){
-    res.json({status: "ok"})
+    res.json({itemList})
 
 }

@@ -8,7 +8,11 @@ module.exports = {
       "main":"#111827",
       "secondary":"#fffbeb",
       "soft":"#1f2937",
-      "red":"#b91c1c"
+      "red":"#b91c1c",
+      "orange":"#f59e0b",
+      "green":"#15803d",
+      "blue":"#2563eb",
+      "pink": "#c026d3"
     },
     fontFamily:{
       whisper: ['Whisper', 'sans-serif'],
