@@ -68,6 +68,7 @@ contract RacksItemsv3 is IRacksItemsOriginal , ERC1155, ERC1155Holder, AccessCon
   mapping(address => bool) private s_hasTicket; 
   mapping(address => bool) private s_hadTicket;
   mapping(address => bool) private s_ticketIsLended;
+  mapping(address => uint) private s_lastTicket;
   mapping (address => mapping(uint=> uint)) s_marketInventory;
 
 
@@ -407,6 +408,7 @@ contract RacksItemsv3 is IRacksItemsOriginal , ERC1155, ERC1155Holder, AccessCon
         0,
         true
       ));
+      s_lastTicket[msg.sender]=s_ticketCount;
       s_ticketCount++;
       s_isSellingTicket[msg.sender] = true;
       s_hadTicket[msg.sender] = true;
@@ -467,6 +469,7 @@ contract RacksItemsv3 is IRacksItemsOriginal , ERC1155, ERC1155Holder, AccessCon
     s_hasTicket[msg.sender] = true;
     _tickets[ticketId].owner = msg.sender;
     _tickets[ticketId].isAvaliable = false;
+    s_lastTicket[msg.sender]=ticketId;
     emit ticketBought(ticketId, oldOwner, msg.sender, _tickets[ticketId].price);
   }
 
@@ -525,7 +528,7 @@ contract RacksItemsv3 is IRacksItemsOriginal , ERC1155, ERC1155Holder, AccessCon
 
   function getUserTicket(address user) public override view returns(uint256 ticket, uint256 ownerOrSpender){
     uint256 ownerOrSpender;
-    uint256 ticket=0;
+    uint256 ticket=s_lastTicket[user];
       ownerOrSpender = 
         (s_hasTicket[user] && isVip(user))?1
       : (s_hasTicket[user] && !isVip(user))?2
@@ -533,31 +536,6 @@ contract RacksItemsv3 is IRacksItemsOriginal , ERC1155, ERC1155Holder, AccessCon
       : (s_hadTicket[user] && s_isSellingTicket[user])?4
       :0 ;
 
-      if(ownerOrSpender==2){
-        for(uint i =0; i<_tickets.length; i++){
-          if(_tickets[i].spender==user && _tickets[i].numTries!=0 && getTicketDurationLeft(i)!=0){
-            ticket=i;
-            break;
-          }
-        }
-      }else if(ownerOrSpender==3){
-        for(uint i =0; i<_tickets.length; i++){
-          if(_tickets[i].owner==user && _tickets[i].numTries!=0 && getTicketDurationLeft(i)!=0){
-            ticket=i;
-            break;
-          }
-        }
-
-      }else if(ownerOrSpender==4){
-         for(uint i =0; i<_tickets.length; i++){
-          if(_tickets[i].owner==user && _tickets[i].isAvaliable){
-            ticket=i;
-            break;
-          }
-        }
-      
-        
-      }
       return (ticket, ownerOrSpender);
 
 
@@ -572,24 +550,25 @@ contract RacksItemsv3 is IRacksItemsOriginal , ERC1155, ERC1155Holder, AccessCon
   */
 
 
-   function getTicketDurationLeft(uint256 ticketId) public override view returns (address, uint256, bool) {
+   function getTicketDurationLeft(uint256 ticketId) public override view returns (uint256) {
+     
     require(_tickets[ticketId].timeWhenSold > 0, "Ticket is not sold yet.");
     uint256 timeLeft;
     if ((_tickets[ticketId].numTries == 0)) {
       if((((block.timestamp - _tickets[ticketId].timeWhenSold)/60) == (_tickets[ticketId].duration * 60))) {
         timeLeft = 0;
-        return (_tickets[ticketId].owner, timeLeft, false);
+        return(timeLeft);
       }else {
         timeLeft = (_tickets[ticketId].duration * 60) - ((block.timestamp - _tickets[ticketId].timeWhenSold)/60);
-        return (_tickets[ticketId].owner, timeLeft, false);
+        return(timeLeft);
       } 
     } else {
       if((((block.timestamp - _tickets[ticketId].timeWhenSold)/60) == (_tickets[ticketId].duration * 60))) {
         timeLeft = 0;
-        return (_tickets[ticketId].owner, timeLeft, true);
+        return(timeLeft);
       }else {
         timeLeft = (_tickets[ticketId].duration * 60) - ((block.timestamp - _tickets[ticketId].timeWhenSold)/60);
-        return (_tickets[ticketId].owner, timeLeft, true);
+        return(timeLeft);
       } 
     }
    

@@ -2,7 +2,9 @@
 
 # dependencies
 /node_modules
+/test
 /.pnp
+.truffle config
 .pnp.js
 
 # testing

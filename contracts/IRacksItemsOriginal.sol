@@ -25,7 +25,6 @@ interface IRacksItemsOriginal {
     uint256 duration;
     uint256 price;
     address owner;
-    address spender;
     uint256 timeWhenSold;
     bool isAvaliable;
   }
@@ -82,7 +81,7 @@ interface IRacksItemsOriginal {
 
    function getTicketsOnSale() external view returns(caseTicket[] memory);
   function getUserTicket(address user) external view returns(uint256 ticket, uint256 ownerOrSpender);
-   function getTicketDurationLeft(uint256 ticketId) external view returns (address, uint256, bool);
+   function getTicketDurationLeft(uint256 ticketId) external view returns (uint256);
 
   function isVip(address user) external view returns(bool);
 
