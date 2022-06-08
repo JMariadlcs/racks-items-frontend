@@ -523,7 +523,7 @@ contract RacksItemsv3 is IRacksItemsOriginal , ERC1155, ERC1155Holder, AccessCon
     return tickets;
   }
 
-  function getUserTicket(address user) public view returns(uint256 ticket, uint256 ownerOrSpender){
+  function getUserTicket(address user) public override view returns(uint256 ticket, uint256 ownerOrSpender){
     uint256 ownerOrSpender;
     uint256 ticket=0;
       ownerOrSpender = 
