@@ -24,7 +24,7 @@ contract RacksItemsv3 is IRacksItemsOriginal , ERC1155, ERC1155Holder, AccessCon
         -El getItemsOnSale solo devuelve los que cumplen _itemStillAvailable
         -Buy item tambien lo requiere
         -El receive me daba error y lo puse como function
-        -Hay que meter alguna manera de saber el id del ticket que tienes
+  
 
         Aparte hice otro contrato EXPERIMENTAL intentando reducir el uso de gas  y almacenamiento al maximo(ojo es muy diferente)
         -Ocupa lo mismo

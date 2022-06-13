@@ -246,14 +246,13 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   * - Update marketItems array
   * - Emit event 
   */
-  function listItemOnMarket(uint256 marketItemId, uint256 price) public override {
-    require(balanceOf(msg.sender, marketItemId) > 0, "Item not found.");
-    require(isApprovedForAll(msg.sender, address(this)), "Approved is not correctly done.");
+  function listItemOnMarket(uint256 tokenId, uint256 price) public override {
+    require(_itemStillAvailable(msg.sender, tokenId), "That item isnt available or doesnt exist.");
     require(price>0);
-    s_marketInventory[msg.sender][marketItemId]+=1;
+    s_marketInventory[msg.sender][tokenId]+=1;
     _marketItems.push(
       itemOnSale(
-        marketItemId,
+        tokenId,
         _marketCount,
         price,
         msg.sender,
@@ -262,27 +261,27 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
     );
 
     _marketCount++;
-    emit sellingItem(msg.sender, marketItemId, price);
+    emit sellingItem(msg.sender, tokenId, price);
   }
 
 
   /**
-  * @notice Function used to unlist an item from marketplace
+  * @notice Function used to unlist or edit an item from marketplace
   * @dev
   * - Needs to check that user is trying to unlist an item he owns
-  * - Update item's sold variable
+  * - Update item's variables
   * - Emit event
   */
   function changeMarketItem(uint256 marketItemId,  uint256 newPrice) public override {
-    if(newPrice==0){
     require(_marketItems[marketItemId].itemOwner == msg.sender, "You are not the owner of this item.");
-    _marketItems[marketItemId].isOnSale = false;
-    s_marketInventory[msg.sender][_marketItems[marketItemId].tokenId]-=1;
-    emit unListedItem(msg.sender, marketItemId);
+    if(newPrice==0){
+      _marketItems[marketItemId].isOnSale = false;
+      s_marketInventory[msg.sender][_marketItems[marketItemId].tokenId]-=1;
+      emit unListedItem(msg.sender, marketItemId);
     }else{
-     uint256 oldPrice = _marketItems[marketItemId].price;
-    _marketItems[marketItemId].price = newPrice;
-    emit itemPriceChanged(msg.sender, marketItemId, oldPrice, newPrice);
+      uint256 oldPrice = _marketItems[marketItemId].price;
+      _marketItems[marketItemId].price = newPrice;
+      emit itemPriceChanged(msg.sender, marketItemId, oldPrice, newPrice);
 
     }
   }
@@ -372,9 +371,10 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   *
   */
   function listTicket(uint256 numTries, uint256 _hours, uint256 price) public override onlyVIP {
-    require(s_caseTickets[msg.sender].spender==msg.sender, "User is already currently selling a Ticket");
+    require(_ticketOwnership(msg.sender)==1, "User cant sell a Ticket");
     require(price>0,"Price cant be 0");
     require(_hours<=168,"Max time is 1 week.");
+    require(numTries>0, "Tries cant be 0");
     s_caseTickets[msg.sender].spender = address(this);
     s_caseTickets[msg.sender].numTries = numTries;
     s_caseTickets[msg.sender].duration = _hours;
@@ -386,8 +386,10 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
     *@notice  Returns an address´ tickets data( time, tries and onwership)
 
     */
-  function getTicketData(address user) public override view returns(uint256 durationLeft, uint256 triesLeft, uint256 ownerOrSpender){
-    return (_durationLeft(user), _triesLeft(user), _ownerOrSpender(user));
+  function getUserTicket(address user) public override view returns(uint256 durationLeft, uint256 triesLeft, uint256 ownerOrSpender, uint256 ticketPrice){
+    uint256 ticketPrice;
+    ticketPrice = _ticketOwnership(user)==4? s_caseTickets[user].price : 0;
+    return (_durationLeft(user), _triesLeft(user), _ticketOwnership(user), ticketPrice);
 
   }
 
@@ -395,16 +397,16 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
     *@notice Function to change a selling ticket conditions or even unlist it from the market
   */
   function changeMarketTicket(uint256 newTries, uint256 newHours, uint256 newPrice) public override onlyVIP {
-    require(_ownerOrSpender(msg.sender)==4, "User is not currently selling a Ticket");
+    require(_ticketOwnership(msg.sender)==4, "User is not currently selling a Ticket");
     if(newPrice==0){
-    s_caseTickets[msg.sender].spender=msg.sender;
-    emit unListTicketOnSale(msg.sender);
+      s_caseTickets[msg.sender].spender=msg.sender;
+      emit unListTicketOnSale(msg.sender);
     }
 
     else{
-     s_caseTickets[msg.sender].numTries=newTries;
-    s_caseTickets[msg.sender].duration = newHours;
-    s_caseTickets[msg.sender].price = newPrice;
+      s_caseTickets[msg.sender].numTries=newTries;
+      s_caseTickets[msg.sender].duration = newHours;
+      s_caseTickets[msg.sender].price = newPrice;
     emit ticketConditionsChanged(msg.sender, newTries, newHours, newPrice);
 
     }
@@ -424,7 +426,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   function buyTicket(address owner) public override{
     require(isVip(owner));
     caseTicket memory ticket = s_caseTickets[owner];
-    require(!isVip(msg.sender), "A VIP user can not buy a ticket");
+    require(_ticketOwnership(msg.sender)==0 , "A VIP user or a ticket owner can not buy a ticket");
     require(ticket.spender == address(this), "Ticket is not currently avaliable");
     require(racksToken.allowance(msg.sender, address(this))>=ticket.price);
     racksToken.transferFrom(msg.sender, ticket.owner, ticket.price);
@@ -443,7 +445,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
 
 
   function claimTicketBack() public override onlyVIP {
-    require(_ownerOrSpender(msg.sender)==3);
+    require(_ticketOwnership(msg.sender)==3);
     require(_durationLeft(msg.sender)==0 || _triesLeft(msg.sender)==0 );
     address borrower = s_caseTickets[msg.sender].spender;
     s_caseTickets[msg.sender].spender = s_caseTickets[msg.sender].owner;
@@ -481,7 +483,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
  
   // FUNCTIONS RELATED TO "USERS"
   /**
-  * @notice Check if user is RacksMembers and owns at least 1 MrCrypto
+  * @notice Check if user is RacksMembers and owns at least 1 MrCrypto and is a Racks member at the same time
   * @dev - Require users MrCrypro's balance is > '
   * - Require that RacksMembers user's attribute is true
   */
@@ -548,7 +550,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   */
   function removeSingleRacksMember(address user) public onlyOwnerOrAdmin {
     //require(s_gotRacksMembers[user], "User is already not RacksMember");
-    s_gotRacksMembers[user] = false;
+    delete s_gotRacksMembers[user];
     delete s_caseTickets[user];
   }
 
@@ -561,7 +563,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
     delete s_racksMembers;
     for (uint256 i = 0; i < users.length; i++) {
       //require(s_gotRacksMembers[users[i]], "User is already not RacksMember");
-      s_gotRacksMembers[users[i]] = false;
+      delete s_gotRacksMembers[users[i]];
       delete s_caseTickets[users[i]];
     
     }
@@ -692,7 +694,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   */
 
   function _itemStillAvailable(address owner, uint tokenId) internal view returns(bool){
-    if(balanceOf(owner, tokenId)>0 && isApprovedForAll(owner, address(this))){
+    if(balanceOf(owner, tokenId)>0 ){
       return true;
     }else{
       return false;
@@ -702,7 +704,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   *@notice Check if someone has a tickket 
  */
   function _ownsTicket(address user) internal view returns(bool){
-      if(_ownerOrSpender(user)==1 ||_ownerOrSpender(user)==2 ){
+      if((_ticketOwnership(user)==1 && isVip(user) )|| (_ticketOwnership(user)==2 && _durationLeft(user)>0 && _triesLeft(user)>0 )){
         return true;
       }else{
         return false;
@@ -711,14 +713,13 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   /**
     *@notice Checks if someone is owning, selling, borrowing or lending a ticket, returns 0 else
   */
-    function _ownerOrSpender(address user) internal view returns(uint){//1 for owner, 2 for borrower, 3 for lending, 4 for seller, 0 else
+    function _ticketOwnership(address user) internal view returns(uint){//1 for owner, 2 for borrower, 3 for lending, 4 for seller, 0 else
  
      uint ownerOrSpender=0;
 
      for(uint i=0; i<s_racksMembers.length; i++){
-       if(s_caseTickets[s_racksMembers[i]].owner==user && s_caseTickets[s_racksMembers[i]].spender==user ){
-         ownerOrSpender=1;
-         
+       if(s_caseTickets[s_racksMembers[i]].owner==user && s_caseTickets[s_racksMembers[i]].spender==user && isVip(user)){
+         ownerOrSpender=1; 
         break;
        }
        else if(s_caseTickets[s_racksMembers[i]].owner!=user &&  s_caseTickets[s_racksMembers[i]].spender==user ){
@@ -744,8 +745,10 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   */
   function _durationLeft(address user) internal view returns(uint256){
      uint durationLeft=0;
-    for(uint i=0; i< s_racksMembers.length; i++){
-      if(_ownerOrSpender(user)==2 || _ownerOrSpender(user)==3 ){
+    if(_ticketOwnership(user)==2 || _ticketOwnership(user)==3 || _ticketOwnership(user)==4){
+      for(uint i=0; i< s_racksMembers.length; i++){
+
+        if(s_caseTickets[s_racksMembers[i]].owner == user || s_caseTickets[s_racksMembers[i]].spender == user){
 
          uint duration = s_caseTickets[s_racksMembers[i]].duration * 1 hours;
          bool over = block.timestamp >  s_caseTickets[s_racksMembers[i]].timeWhenSold + duration ? true : false;
@@ -754,6 +757,10 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
            durationLeft = duration-((block.timestamp -  s_caseTickets[s_racksMembers[i]].timeWhenSold))/1 hours; //return hurs left multiplied by 1000 so we can reach decimals
          }
          break;
+
+        }
+
+
        }
      }
       return durationLeft;
@@ -767,15 +774,20 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   */
   function _triesLeft(address user) internal view returns (uint256){
      uint triesLeft=0;
-     for(uint i=0; i<s_racksMembers.length; i++){
-       if(_ownerOrSpender(user)==2 || _ownerOrSpender(user)==3 ){
+      if(_ticketOwnership(user)==2 || _ticketOwnership(user)==3 || _ticketOwnership(user)==4){
+        for(uint i=0; i<s_racksMembers.length; i++){
+          
+        if(s_caseTickets[s_racksMembers[i]].owner == user || s_caseTickets[s_racksMembers[i]].spender == user){
          uint duration = s_caseTickets[s_racksMembers[i]].duration * 1 hours;
          bool over = block.timestamp >  s_caseTickets[s_racksMembers[i]].timeWhenSold + duration ? true : false;
          if(!over){
            triesLeft =  s_caseTickets[s_racksMembers[i]].numTries;
-         }
+          }
         break;
+         }
        }
+
+
      }
       return triesLeft;
   }

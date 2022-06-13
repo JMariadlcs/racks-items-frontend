@@ -17,7 +17,6 @@ import RacksToken from '../build/contracts/RacksToken.json'
 
 export default function Market() {
   const router = useRouter()
-  const [user, setUser]= useState()
   const [processing, setProcessing] = useState(false);
   const [showItemData, setShowItemData] = useState(false);
   const [fetchedData, setFetchedData] = useState({rarity:0, supply:0})
@@ -76,15 +75,13 @@ export default function Market() {
   }
   async function loadItems() {
     /* create a generic provider and query for unsold market items */
-    const web3Modal = new Web3Modal()
-    const connection = await web3Modal.connect()
-    const provider = new ethers.providers.Web3Provider(connection)
-    const signer = provider.getSigner()
-    const contract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
-    const account = await signer.getAddress()
+ 
+    const provider = new ethers.providers.JsonRpcProvider("https://speedy-nodes-nyc.moralis.io/033c7c46afc666ebde825d34/polygon/mumbai")
+    const contract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, provider)
+
     const data = await contract.getItemsOnSale()
     
-    setUser(account)
+  
     /*
     *  map over items returned from smart contract and format 
     *  them as well as fetch their token metadata
@@ -137,7 +134,6 @@ export default function Market() {
     <div className=" grid grid-cols-1 mx-auto my-auto md:grid-cols-3 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
           {
             items
-              .filter(item => item.owner!=user)
               .map((item, i) => (
             
               <div className='border w-56  border-main overflow-hidden rounded flex-col items-center bg-main/70' >
@@ -160,11 +156,12 @@ export default function Market() {
           {
         
         showItemData && (
-          <div className='absolute w-full flex flex-col  bg-gradient-to-r from-soft '> 
+          <div className=' w-full flex flex-col justify-center items-center fixed'> 
                         <div className='flex '>
-                <Sidebar/>
+                     
+               
                 
-                <div class="mainscreen">
+                <div class="mainscreen ">
                   
           
               <div class="card">
@@ -180,7 +177,7 @@ export default function Market() {
                   <div className='flex justify-between'><h1 className=' text-main text-xl font-semibold'>{itemList[pickItem.tokenId].name}</h1><button onClick={()=>{setProcessing(false);setShowItemData(false);}}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
                           <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
                         </svg></button></div>
-                  <p className='text-soft'>Categoría:<label className={`ml-2 ${itemList[pickItem.tokenId].color} font-semibold`} >{itemList[pickItem.tokenId].rarity} </label></p>
+                  <p className='text-soft'>Categoría:<label className={`ml-2 ${itemList[pickItem.tokenId].textColor} font-semibold`} >{itemList[pickItem.tokenId].rarity} </label></p>
                  <p className='text-soft'>Probabilidad:<label className="text-main ml-2 font-semibold" >{(100/fetchedData.rarity).toFixed(2)}% </label></p>
                  <p className='text-soft'>En circulación:<label className="text-main ml-2 font-semibold" >{fetchedData.supply} </label></p>
                  <p className='text-soft'>Precio: <label className='mr-2'>{pickItem.price}</label>RKS</p>

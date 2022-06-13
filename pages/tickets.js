@@ -34,19 +34,31 @@ export default function Home() {
     const provider = new ethers.providers.Web3Provider(connection)
     const signer = provider.getSigner()
     const contract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
-    const data = await contract.getTicketData(commerceAddress)
     const account = await signer.getAddress()
+    const data = await contract.getUserTicket(account)
     
     setUser(account)
-    const {0: durationLeft, 1: triesLeft, 3: ownerOrSpender} = result;
-
+    const {0: dur, 1: tr, 2: own, 3:pr} = data;
+    const durationLeft =  data[0].toNumber()
+    const triesLeft = data[1].toNumber()
+    const ownerOrSpender=0
+    const ticketPrice=0
     
-    if(result.triesLeft.toNumber()==0){
+    const _ticket = {
+      durationLeft,
+      triesLeft,
+      ownerOrSpender,
+      ticketPrice
+
+    }
+    setTicket(_ticket)
+
+   
+    if(ticket.durationLeft==0 ||ticket.triesLeft==0){
       setTicketState({color:"bg-red", message:"Caducado"})
     }else{
       setTicketState({color:"bg-green", message:"En uso"})
     }
-    setTicket(result)
 
   }
 
@@ -197,12 +209,12 @@ export default function Home() {
       <div className='text-3xl  flex items-center font-bold px-4 py-4 border-b border-secondary'><img src="/racksLogoDos.png" className='h-8 w-36'/><p className='ml-8 neon font-bold text-3xl  font-whisper'>Tickets</p></div>
       <div>
         {
-         ticket.ownerOrSpender.toNumber()==1?(
+         ticket.ownerOrSpender==1?(
           <div className='w-full mx-auto flex items-center px-16 justify-between  h-16 rounded'>
              <div className='flex items-center'><div className='h-2 w-2 mr-4 rounded-full bg-orange '></div><p className='font-semibold'>VIP</p></div>
              <button className='bg-red rounded hover:bg-main  px-4 py-2' onClick={listTicket}>Vender ticket</button>
           </div>
-        ): ticket.ownerOrSpender.toNumber()==2?(
+        ): ticket.ownerOrSpender==2?(
          <div className='w-full mx-auto flex items-center px-16 justify-between  h-16 rounded'>
             <div className='flex items-center'>
               <div className={` h-2 w-2 mr-4 rounded-full  ${ticketState.color}`} ></div>
@@ -211,7 +223,7 @@ export default function Home() {
          </div>
           
          </div>
-       ):ticket.ownerOrSpender.toNumber()==3?(
+       ):ticket.ownerOrSpender==3?(
          <div className='w-full mx-auto flex items-center px-16 justify-between  h-16 rounded'>
             <div className='flex items-center'>
               <div className={` h-2 w-2 mr-4 rounded-full  ${ticketState.color}`} ></div>
@@ -220,7 +232,7 @@ export default function Home() {
          </div>
           
          </div>
-       ):ticket.ownerOrSpender.toNumber()==4?(
+       ):ticket.ownerOrSpender==4?(
          <div>
            En venta
          </div>

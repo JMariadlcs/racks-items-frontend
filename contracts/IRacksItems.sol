@@ -40,7 +40,7 @@ interface IRacksItems {
   
 
   
-  function getTicketData(address user) external view returns(uint256 durationLeft, uint256 triesLeft, uint256 ownerOrSpender);
+  function getUserTicket(address user) external view returns(uint256 durationLeft, uint256 triesLeft, uint256 ownerOrSpender , uint256 ticketPrice);
   function getCasePrice() external view returns(uint256);
 
   function openCase() external;

@@ -63,7 +63,6 @@ export default function Inventory() {
     const provider = new ethers.providers.Web3Provider(connection)
     const signer = provider.getSigner()
     const marketContract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
-    const approval = await marketContract.setApprovalForAll(commerceAddress, true)
     const transaction = await marketContract.listItemOnMarket(pickItem.tokenId, formInput.price.toString())
     await transaction.wait()
     setProcessing(false)
@@ -205,11 +204,11 @@ export default function Inventory() {
     </div>
   
     {showForm && (
-        <div className='absolute w-full flex flex-col  bg-gradient-to-r from-soft '> 
+        <div className=' w-full flex flex-col justify-center items-center fixed'> 
         <div className='flex '>
-<Sidebar/>
 
-<div class="mainscreen">
+<div className='flex flex-col h-screen w-full sticky top-0'>
+<div class="mainscreen  ">
   
 
 <div class="card">
@@ -260,15 +259,15 @@ export default function Inventory() {
 
 
     
-
+</div>
   </div>
       )}
       {
         
         showCheckout && (
-          <div className='absolute w-full flex flex-col h-screen bg-gradient-to-r from-soft '> 
+          <div className=' w-full flex flex-col justify-center items-center fixed '> 
                         <div className='flex '>
-                <Sidebar/>
+               
                 
                 <div class="mainscreen ">
                   
@@ -327,11 +326,11 @@ export default function Inventory() {
               {
         
         showItemData && (
-          <div className='absolute w-full flex flex-col  bg-gradient-to-r from-soft '> 
-                        <div className='flex '>
-                <Sidebar/>
+          <div className=' w-full flex flex-col justify-center items-center fixed  '> 
+                       
                 
-                <div class="mainscreen">
+                
+                <div class="mainscreen  ">
                   
           
               <div class="card">
@@ -347,7 +346,7 @@ export default function Inventory() {
                   <div className='flex justify-between'><h1 className=' text-main text-xl font-semibold'>{itemList[pickItem.tokenId].name}</h1><button onClick={()=>{setProcessing(false);setShowCheckOut(false);setShowForm(false) ;setShowItemData(false);}}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
                           <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
                         </svg></button></div>
-                        <p className='text-soft '>Categoría:<label className={`m-2 font-semibold`} >{itemList[pickItem.tokenId].rarity}  </label></p>
+                        <p className='text-soft '>Categoría:<label className={`${itemList[pickItem.tokenId].textColor} m-2 font-semibold`} >{itemList[pickItem.tokenId].rarity}  </label></p>
                  <p className='text-soft'>Probabilidad:<label className="text-main ml-2 font-semibold" >{(100/fetchedData.rarity).toFixed(2)}% </label></p>
                  <p className='text-soft'>En circulación:<label className="text-main ml-2 font-semibold" >{fetchedData.supply} </label></p>
 
@@ -355,7 +354,7 @@ export default function Inventory() {
               </div>
             </div>
                 </div>
-                  </div>
+                
                 )
               }
     </div>

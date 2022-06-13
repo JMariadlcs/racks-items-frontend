@@ -1,2 +1,2 @@
-export const commerceAddress = "0xB439C1d2A8bCfa44636513B35A0b53a38462dd42";
-export const tokenAddress = "0xcbC24B9225B0261dF83CfC03084c2f24B1666fc5"
+export const commerceAddress = "0x1eC983B53b6B18e57D132f313C96dc5f8e559C73";
+export const tokenAddress = "0x4815A8eACaB3bdfE589F531197Ae93CDE2C0aB98"

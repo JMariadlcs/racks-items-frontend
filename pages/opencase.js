@@ -39,11 +39,13 @@ export default function opencase() {
     const signer = provider.getSigner()
     const account = await signer.getAddress()
     const contract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
-    const data = await contract.getTicketData(account.toString());
-    const {0: durationLeft, 1: triesLeft, 3:ownerOrSpender} = result;
-    if(data.ownerOrSpender.toNumber()==1 || data.ownerOrSpender.toNumber()==1){
-      setVipState(true)
-    }
+    const data = await contract.getUserTicket(account.toString());
+    const {0: durationLeft, 1: triesLeft, 3:ownerOrSpender, 4:ticketPrice} = data;
+    console.log(data)
+
+    // if(data[0].toNumber()==1 || data[0].toNumber()==3){
+    //   setVipState(true)
+    // }
 
 
   }
