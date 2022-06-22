@@ -15,8 +15,9 @@ import RacksItemsv3 from '../build/contracts/RacksItemsv3.json'
 import RacksToken from '../build/contracts/RacksToken.json'
 
 
-export default function Market() {
+export default function Market({user, userConnected}) {
   const router = useRouter()
+  const [userBalance, setUserBalance]= useState(0)
   const [processing, setProcessing] = useState(false);
   const [showItemData, setShowItemData] = useState(false);
   const [fetchedData, setFetchedData] = useState({rarity:0, supply:0})
@@ -34,12 +35,21 @@ export default function Market() {
   }, [])
 
   async function fetchItemData(tokenId){
-
+    loadUserBalance()
     const web3Modal = new Web3Modal()
     const connection = await web3Modal.connect()
     const provider = new ethers.providers.Web3Provider(connection)
     const signer = provider.getSigner()
+    const account = await signer.getAddress()
+    
+
     const marketContract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
+    const tokenContract = new ethers.Contract(tokenAddress,RacksToken.abi, signer)
+    const balance = await tokenContract.balanceOf(account)
+    const userBalance = balance.toNumber()
+    setUserBalance(userBalance)
+    console.log(userBalance)
+
 
     const rarity = await marketContract.rarityOfItem(tokenId);
     const supply = await marketContract.supplyOfItem(tokenId);
@@ -55,8 +65,26 @@ export default function Market() {
     setShowItemData(!showItemData)
 
   }
+  async function loadUserBalance(){
+    const web3Modal = new Web3Modal()
+    const connection = await web3Modal.connect()
+    const provider = new ethers.providers.Web3Provider(connection)
+    const signer = provider.getSigner()
+    const account = await signer.getAddress()
+    const tokenContract = new ethers.Contract(tokenAddress,RacksToken.abi, signer)
+    const balance = await tokenContract.balanceOf(account)
+    const userBalance = balance.toNumber()
+    setUserBalance(userBalance)
+    console.log(userBalance)
+
+
+  }
   
     async function buyItem(item) {
+    if(userBalance<item.price){
+      alert("Balance insuficiente")
+    }else{
+    
     setProcessing(true)
     const web3Modal = new Web3Modal()
     const connection = await web3Modal.connect()
@@ -66,19 +94,23 @@ export default function Market() {
     const marketContract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
     
     const approval = await Tokencontract.approve(commerceAddress, item.price.toString())
-    const transaction = await marketContract.buyItem(item.marketItemId )
+    const transaction = await marketContract.buyItem(item.marketItemId ,{gasLimit : 3000000})
     await transaction.wait()
     setProcessing(true)
     router.push("/inventory")
-    
+    }
     
   }
-  async function loadItems() {
-    /* create a generic provider and query for unsold market items */
- 
-    const provider = new ethers.providers.JsonRpcProvider("https://speedy-nodes-nyc.moralis.io/033c7c46afc666ebde825d34/polygon/mumbai")
-    const contract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, provider)
 
+  async function loadItems() {
+    loadUserBalance()
+    const web3Modal = new Web3Modal()
+    const connection = await web3Modal.connect()
+    const provider = new ethers.providers.Web3Provider(connection)
+    const signer = provider.getSigner()
+    const account = await signer.getAddress()
+    const contract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
+    
     const data = await contract.getItemsOnSale()
     
   
@@ -86,7 +118,9 @@ export default function Market() {
     *  map over items returned from smart contract and format 
     *  them as well as fetch their token metadata
     */
-    const items = await Promise.all(data.map(async i => {
+    const items = await Promise.all(data
+      .filter(item=> item.itemOwner != account)
+      .map(async i => {
       // const tokenUri = await contract.tokenURI(i.tokenId) hacerlo en variable
       
       let price=i.price.toString()
@@ -106,6 +140,8 @@ export default function Market() {
     setItems(items)
     setLoadingState('loaded') 
   }
+
+
   if(loadingState!=='loaded'){
     return(
       <div className="flex bg-gradient-to-r from-soft">
@@ -126,7 +162,7 @@ export default function Market() {
   else if (loadingState === 'loaded' && !items.length) return (
     <div className='flex bg-gradient-to-r from-soft'>
       <Sidebar/>
-    <h1 className="px-20 py-10 text-md">No hay items en venta</h1></div>
+    <h1 className="px-20 py-10 text-md">No hay items en venta disponibles para ti.</h1></div>
   )
   return (
     <div className='flex bg-gradient-to-r from-soft'>
@@ -184,14 +220,24 @@ export default function Market() {
                  <div class="expcvv">
 
                 </div>
+           
                 {
                        processing ? (
                         <div  className="button flex justify-center bg-pink-40 "> <div class="comprar "><div></div><div></div><div></div></div></div>
                  
              
-                      ):(
+                      ): (userBalance<pickItem.price)?
+                        (
+                          <div className='text-soft font-semibold'>No tienes fondos suficientes</div>
+                        ):
+                      
+                        (
+                        
+                      
                       <div onClick={()=>buyItem(pickItem)} className="button cursor-pointer flex justify-center bg-pink hover:bg-pink/40">Comprar</div>)
-                    }
+
+
+                }
                 
             
                 

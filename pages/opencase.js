@@ -15,7 +15,7 @@ import RacksItemsv3 from '../build/contracts/RacksItemsv3.json'
 import RacksToken from '../build/contracts/RacksToken.json'
 import Link from 'next/link'
 
-export default function opencase() {
+export default function opencase({user, userConnected}) {
   const [opening, setOpening] = useState(false)
   const [vipState, setVipState]=useState(false)
   const [loadingState, setLoadingState]=useState(false)

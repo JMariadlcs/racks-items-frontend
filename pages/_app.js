@@ -3,11 +3,41 @@ import Link from 'next/link'
 import Image from 'next/Image';
 import { useEffect, useState } from 'react'
 
+
+
 function MyApp({ Component, pageProps }) {
-  
+  const [walletConnected, setWalletConnected] = useState(false)
+  const [userAddress , setUserAddress] = useState()
+  useEffect(()=>{
+    if(window.ethereum){
+      window.ethereum.on("accountsChanged", (accounts) => {
+      setWalletConnected(false)
+      requestAccounts()
+    
+    })
+    }
+  },[])
+  async function requestAccounts(){
+    console.log("Requesting account...")
+    if(window.ethereum){
+      console.log("detected")
+    }else{
+      console.log("metamask not installed")
+    }
+
+    try{
+      const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+      const account = accounts[0];
+      if(account.length){
+      setWalletConnected(true)
+      setUserAddress(account)}
+    }catch{
+      console.log("Error connecting...")
+    }
+  }
   return (
   <div>
-    <header className='px-8 py-4 border-b border-secondary'>
+    <header className='px-8 py-4 flex justify-between border-b border-secondary'>
       <nav className='flex justify-between items-center'>
         <Link href="/">
           <a className='flex space-x-2  items-center'>
@@ -17,9 +47,13 @@ function MyApp({ Component, pageProps }) {
         </Link>
 
       </nav>
+      {
+        !walletConnected?(<button onClick={()=> requestAccounts()} className='go  mr-8'>Conectar</button>):(<div className='user flex justify-center items-baseline'>{userAddress.substring(0,5)}...{userAddress.substring(10,15)}</div>)
+      }
+     
     </header>
    
-      <Component {...pageProps} />
+      <Component user={userAddress} userConnected={walletConnected} {...pageProps} />
 
  
   </div> 

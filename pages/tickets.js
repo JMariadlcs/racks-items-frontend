@@ -13,8 +13,8 @@ import {
 import RacksItemsv3 from '../build/contracts/RacksItemsv3.json'
 import RacksToken from '../build/contracts/RacksToken.json'
 
-export default function Home() {
-  const [user, setUser]= useState()
+export default function Tickets({user, userConnected}) {
+  const [ticketUser, setUser]= useState()
   const [ticket, setTicket] = useState({})
   const [ticketState, setTicketState]= useState({})
   const [items, setItems] = useState([])
@@ -41,8 +41,8 @@ export default function Home() {
     const {0: dur, 1: tr, 2: own, 3:pr} = data;
     const durationLeft =  data[0].toNumber()
     const triesLeft = data[1].toNumber()
-    const ownerOrSpender=0
-    const ticketPrice=0
+    const ownerOrSpender= data[2].toNumber()
+    const ticketPrice= data[3].toNumber()
     
     const _ticket = {
       durationLeft,
@@ -51,6 +51,7 @@ export default function Home() {
       ticketPrice
 
     }
+    console.log(_ticket)
     setTicket(_ticket)
 
    
@@ -96,7 +97,7 @@ export default function Home() {
     *  them as well as fetch their token metadata
     */
     const items = await Promise.all(data.map(async i => {
-      // const tokenUri = await contract.tokenURI(i.tokenId) hacerlo en variable
+
       
       let price=i.price.toNumber()
       let duration=i.duration.toNumber()
