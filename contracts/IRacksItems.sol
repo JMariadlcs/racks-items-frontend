@@ -41,7 +41,7 @@ interface IRacksItems {
 
   
   function getUserTicket(address user) external view returns(uint256 durationLeft, uint256 triesLeft, uint256 ownerOrSpender , uint256 ticketPrice);
-  function getCasePrice() external view returns(uint256);
+
 
   function openCase() external;
 
@@ -74,14 +74,14 @@ interface IRacksItems {
 
    function getTicketsOnSale() external view returns(caseTicket[] memory);
 
-  function isVip(address user) external view returns(bool) ;
+  function isVIP(address user) external view returns(bool) ;
 
-  function memberList() external view returns(address [] memory);
+  function VIPList() external view returns(address [] memory);
   
   
   function uri(uint256 tokenId) external view returns (string memory);
 
-  function receiveFunds() external payable;
+
 
 
 }

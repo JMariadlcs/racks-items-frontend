@@ -4,13 +4,13 @@
 
 pragma solidity ^0.8.0;
 import "./IRacksItems.sol";
-import "../node_modules/@openzeppelin/contracts/access/AccessControl.sol"; // define roles
-import "../node_modules/@openzeppelin/contracts/token/ERC1155/ERC1155.sol"; // erc1155 tokens
-import "../node_modules/@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol"; // contract should be ERC1155 holder to receive ERC1155 tokens
-import "../node_modules/@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol"; // to instanciate MrCrypto object
-import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol"; // to work with RacksToken
-import "../node_modules/@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol"; // to work with COORDINATOR and VRF
-import "../node_modules/@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol"; // to use functionalities for Chainlink VRF
+import "@openzeppelin/contracts/access/AccessControl.sol"; // define roles
+import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol"; // erc1155 tokens
+import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol"; // contract should be ERC1155 holder to receive ERC1155 tokens
+import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol"; // to instanciate MrCrypto object
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol"; // to work with RacksToken
+import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol"; // to work with COORDINATOR and VRF
+import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol"; // to use functionalities for Chainlink VRF
 
 contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VRFConsumerBaseV2 { // VRFv2SubscriptionManager
    
@@ -43,10 +43,10 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   /// @notice VRF Variables
   VRFCoordinatorV2Interface public immutable i_vrfCoordinator; 
   bytes32 public immutable i_gasLane;
-  uint25664 public immutable i_subscriptionId;
-  uint25632 public immutable i_callbackGasLimit;
-  uint25616 public constant REQUEST_CONFIRMATIONS = 3; 
-  uint25632 public constant NUM_WORDS = 2; 
+  uint64 public immutable i_subscriptionId;
+  uint32 public immutable i_callbackGasLimit;
+  uint16 public constant REQUEST_CONFIRMATIONS = 3; 
+  uint32 public constant NUM_WORDS = 2; 
   uint256 public s_randomWord; // random Number we get from Chainlink VRF
   
   /// @notice Mappings
@@ -87,7 +87,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   /**  @notice Check that there is at least 1 item avaliable so the user can open a case for example
   */
   modifier supplyAvaliable() {
-    require(maxTotalSupply > 0, "There are no items avaliable");
+    require(totalSupply > 0, "There are no items avaliable");
     _;
   }
 
@@ -97,7 +97,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
     _;
   }
 
-  constructor(address vrfCoordinatorV2, bytes32 gasLane, uint25664 subscriptionId, uint25632 callbackGasLimit, address _racksTokenAddress, address _MockMrCryptoAddress) 
+  constructor(address vrfCoordinatorV2, bytes32 gasLane, uint64 subscriptionId, uint32 callbackGasLimit, address _racksTokenAddress, address _MockMrCryptoAddress) 
   VRFConsumerBaseV2(vrfCoordinatorV2)
   ERC1155(""){
     /**
@@ -153,7 +153,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   */
   function openCase() public override ownsTicket(msg.sender) supplyAvaliable contractIsActive  {  
     racksToken.transferFrom(msg.sender, address(this), casePrice);
-    uint256 randomNumber = _randomNumber()  % maxTotalSupply;
+    uint256 randomNumber = _randomNumber()  % totalSupply;
     uint256 [] itemsList = caseLiquidity();
     uint256 totalCount = 0;
     uint256 item;
@@ -271,7 +271,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
     require(balanceOf(msg.sender, tokenId) > 0);
     _burn(msg.sender, tokenId, 1);
     s_maxSupply[tokenId] -= 1;
-    maxTotalSupply -=1;
+    totalSupply -=1;
     emit itemExchanged(msg.sender, tokenId);
   }
 
@@ -682,7 +682,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   function _mintSupply(address receiver, uint256 amount) internal {
       _mint(receiver, s_tokenCount, amount, "");
       _setMaxSupply(s_tokenCount, amount);
-      maxTotalSupply += amount;
+      totalSupply += amount;
       s_tokenCount += 1;
   }
 
