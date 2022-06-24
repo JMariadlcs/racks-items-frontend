@@ -15,7 +15,7 @@ import RacksItemsv3 from '../build/contracts/RacksItemsv3.json'
 import RacksToken from '../build/contracts/RacksToken.json'
 import Link from 'next/link'
 
-export default function opencase({user, userConnected}) {
+export default function Opencase({user, userConnected}) {
   const [opening, setOpening] = useState(false)
   const [vipState, setVipState]=useState(false)
   const [loadingState, setLoadingState]=useState(false)
@@ -41,11 +41,12 @@ export default function opencase({user, userConnected}) {
     const contract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
     const data = await contract.getUserTicket(account.toString());
     const {0: durationLeft, 1: triesLeft, 3:ownerOrSpender, 4:ticketPrice} = data;
-    console.log(data)
+    const dur= data[1].toNumber()
+    console.log(dur)
 
-    // if(data[0].toNumber()==1 || data[0].toNumber()==3){
-    //   setVipState(true)
-    // }
+    if(data[0].toNumber()==1 || data[0].toNumber()==3){
+      setVipState(true)
+    }
 
 
   }

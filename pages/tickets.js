@@ -36,23 +36,12 @@ export default function Tickets({user, userConnected}) {
     const contract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
     const account = await signer.getAddress()
     const data = await contract.getUserTicket(account)
+    const {0: durationLeft, 1: triesLeft, 3:ownerOrSpender, 4:ticketPrice} = data;
     
     setUser(account)
-    const {0: dur, 1: tr, 2: own, 3:pr} = data;
-    const durationLeft =  data[0].toNumber()
-    const triesLeft = data[1].toNumber()
-    const ownerOrSpender= data[2].toNumber()
-    const ticketPrice= data[3].toNumber()
+    setTicket(data)
     
-    const _ticket = {
-      durationLeft,
-      triesLeft,
-      ownerOrSpender,
-      ticketPrice
-
-    }
-    console.log(_ticket)
-    setTicket(_ticket)
+    
 
    
     if(ticket.durationLeft==0 ||ticket.triesLeft==0){

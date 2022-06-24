@@ -272,8 +272,8 @@ export default function Inventory({user, userConnected}) {
         <div onClick={()=>loadItems()}  className='bg-main w-24 flex justify-center cursor-pointer items-center h-8  '>Inventario</div>
         <div onClick={()=>loadMarketInventory()}  className='bg-main w-24 flex justify-center cursor-pointer items-center h-8 '>En venta</div>
       </div>
-      <div className='m-4'>
-        <input onChange={(e)=> {setSearchWallet(e.target.value); loadExternalInventory(e.target.value)}}  type="text" className="px-4 py-2 text-white bg-main outline-none" placeholder='Buscar wallet'  ></input>
+      <div className='m-4 md:w-72 lg:w-96 '>
+        <input onChange={(e)=> {setSearchWallet(e.target.value); loadExternalInventory(e.target.value)}}  type="text" className="w-full px-4 py-2 text-white bg-main outline-none" placeholder='Buscar wallet'  ></input>
         
 
       </div>

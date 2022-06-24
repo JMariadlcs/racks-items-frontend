@@ -31,7 +31,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   /// @notice Standard variables
   bytes32 public constant ADMIN_ROLE = 0x00;
   address private _owner;
-  uint256 private s_maxTotalSupply;
+  uint256 public totalSupply;
   uint256 private s_tokenCount;
   uint256 private _marketCount;
   uint256 public casePrice; // Change to RacksToken
@@ -43,18 +43,18 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   /// @notice VRF Variables
   VRFCoordinatorV2Interface public immutable i_vrfCoordinator; 
   bytes32 public immutable i_gasLane;
-  uint64 public immutable i_subscriptionId;
-  uint32 public immutable i_callbackGasLimit;
-  uint16 public constant REQUEST_CONFIRMATIONS = 3; 
-  uint32 public constant NUM_WORDS = 2; 
+  uint25664 public immutable i_subscriptionId;
+  uint25632 public immutable i_callbackGasLimit;
+  uint25616 public constant REQUEST_CONFIRMATIONS = 3; 
+  uint25632 public constant NUM_WORDS = 2; 
   uint256 public s_randomWord; // random Number we get from Chainlink VRF
   
   /// @notice Mappings
   mapping(address => bool) private s_gotRacksMembers;
-  mapping(uint => uint) private s_maxSupply;
+  mapping(uint256 => uint256) private s_maxSupply;
   mapping (uint256 => string) private s_uris; 
   mapping (address => caseTicket) private s_caseTickets;
-  mapping (address => mapping(uint=> uint)) s_marketInventory;
+  mapping (address => mapping(uint256=> uint256)) s_marketInventory;
 
   /// @notice Modifiers
   /// @notice Check that person calling a function is the owner of the Contract
@@ -71,7 +71,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
 
   /// @notice Check that user is Member and owns at least 1 MrCrypto
   modifier onlyVIP() {
-    require(isVip(msg.sender), "User is not RacksMembers or does not owns a MrCrypto");
+    require(isVIP(msg.sender), "User is not RacksMembers or does not owns a MrCrypto");
       _;
   }
 
@@ -87,7 +87,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   /**  @notice Check that there is at least 1 item avaliable so the user can open a case for example
   */
   modifier supplyAvaliable() {
-    require(s_maxTotalSupply > 0, "There are no items avaliable");
+    require(maxTotalSupply > 0, "There are no items avaliable");
     _;
   }
 
@@ -97,7 +97,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
     _;
   }
 
-  constructor(address vrfCoordinatorV2, bytes32 gasLane, uint64 subscriptionId, uint32 callbackGasLimit, address _racksTokenAddress, address _MockMrCryptoAddress) 
+  constructor(address vrfCoordinatorV2, bytes32 gasLane, uint25664 subscriptionId, uint25632 callbackGasLimit, address _racksTokenAddress, address _MockMrCryptoAddress) 
   VRFConsumerBaseV2(vrfCoordinatorV2)
   ERC1155(""){
     /**
@@ -139,12 +139,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
     emit casePriceChanged(price);
   }
 
-  /**
-  * @notice View case price
-  */
-  function getCasePrice() public override view returns(uint256) {
-    return casePrice;
-  }
+
 
    /**
   * @notice Function used to 'open a case' and get an item
@@ -158,29 +153,22 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   */
   function openCase() public override ownsTicket(msg.sender) supplyAvaliable contractIsActive  {  
     racksToken.transferFrom(msg.sender, address(this), casePrice);
-    uint256 randomNumber = _randomNumber()  % s_maxTotalSupply;
+    uint256 randomNumber = _randomNumber()  % maxTotalSupply;
+    uint256 [] itemsList = caseLiquidity();
     uint256 totalCount = 0;
     uint256 item;
 
-    for(uint256 i = 0 ; i < s_tokenCount; i++) {
-      uint256 _newTotalCount = totalCount + s_maxSupply[i] ;
+    for(uint256 i = 0 ; i < itemList.length; i++) {
+      uint256 _newTotalCount = totalCount + s_maxSupply[itemList[i]] ;
       if(randomNumber > _newTotalCount) {
         totalCount = _newTotalCount;
       }else {
-        item = i;
-        if(balanceOf(address(this),item)==0){
-          for(uint256 j = item-1; j >= 0; j--){
-            if (balanceOf(address(this),j)>0){
-              item = j;
-              break;
-            }
-          }
-        }
+        item = itemList[i];
         _safeTransferFrom(address(this), msg.sender, item , 1,"");
         break;
       }
     }
-    if (!isVip(msg.sender)){ // Case opener is someone that bought a ticket
+    if (!isVIP(msg.sender)){ // Case opener is someone that bought a ticket
     _decreaseTicketTries(msg.sender);
     }
     emit CaseOpened(msg.sender, casePrice, item);
@@ -193,20 +181,8 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   * @notice Returns maxSupply of specific item (by tokenId)
   * @dev - Getter of s_maxSupply mapping
   */
-  function supplyOfItem(uint256 tokenId) public override view returns(uint) {
+  function supplyOfItem(uint256 tokenId) public override view returns(uint256) {
     return s_maxSupply[tokenId];
-  }
-
-  /**
-  * @notice Calculate chance of receiving an specific item
-  * - As higher is result higher is the rarity of the item
-  * @dev - Requires that tokenId exists (item is listed)
-  * - chance is calculated as item supply divided by total items supply(the bigger the number the more exclusive is)=>To calculate the chance: 100/rarityOfItem(tokenId)
-  */
-  function rarityOfItem(uint256 tokenId) public virtual view returns(uint256) {
-    require(_itemExists(tokenId));
-    uint256 result = s_maxTotalSupply / s_maxSupply[tokenId];
-    return result;
   }
 
   /**
@@ -215,7 +191,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   * @dev Copy users inventory in an empty array and returns it
   */
   function viewItems(address owner) public override view returns(uint256[] memory) { 
-    uint256[] memory inventory = new uint [](s_tokenCount);
+    uint256[] memory inventory = new uint256 [](s_tokenCount);
     for(uint256 i=0 ; i<inventory.length; i++) {
       inventory[i]=balanceOf(owner,i)-s_marketInventory[owner][i];
     }
@@ -295,7 +271,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
     require(balanceOf(msg.sender, tokenId) > 0);
     _burn(msg.sender, tokenId, 1);
     s_maxSupply[tokenId] -= 1;
-    s_maxTotalSupply -=1;
+    maxTotalSupply -=1;
     emit itemExchanged(msg.sender, tokenId);
   }
 
@@ -327,7 +303,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   /**
   * @notice Function used to return items that are currently on sale
   */
-  function getMarketItem(uint marketItemId) public override view returns(itemOnSale memory) {
+  function getMarketItem(uint256 marketItemId) public override view returns(itemOnSale memory) {
     return _marketItems[marketItemId];
   }
 
@@ -335,16 +311,16 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   * @notice function used to return every item that is on sale on the MarketPlace
   */
   function getItemsOnSale() public override view returns(itemOnSale[] memory)  {
-    uint arrayLength;
+    uint256 arrayLength;
     
-    for(uint i=0; i<_marketItems.length;i++){
+    for(uint256 i=0; i<_marketItems.length;i++){
       itemOnSale memory item = _marketItems[i];
       if(item.isOnSale == true && _itemStillAvailable(item.itemOwner, item.tokenId)){
         arrayLength+=1;
       }
     }
     itemOnSale[] memory items = new itemOnSale[](arrayLength);
-    uint indexCount;
+    uint256 indexCount;
     for(uint256 i = 0; i < _marketItems.length; i++){
       itemOnSale memory  item = _marketItems[i];
       if(item.isOnSale == true && _itemStillAvailable(item.itemOwner, item.tokenId) ){
@@ -359,7 +335,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
 
   /**
   * @notice This function is used for a VIP user to list 'Case Tickets' on the MarketPlace
-  * @dev - Should check that user is Vip (Modifier)
+  * @dev - Should check that user is VIP (Modifier)
   * - Check is user has had a ticket before
   *     - If so: check that is has ticket now
   *     - if not: create ticket (first ticket in live for this user)
@@ -415,7 +391,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
 
     /**
   * @notice This function is used to buy a caseTicket
-  * @dev - Should check that user is NOT Vip -> does make sense that a VIP user buys a ticket
+  * @dev - Should check that user is NOT VIP -> does make sense that a VIP user buys a ticket
   * - Should check that user has a listed ticket
   * - Transfer RacksToken from buyer to seller
   * - Update mappings variables
@@ -424,7 +400,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
 
   
   function buyTicket(address owner) public override{
-    require(isVip(owner));
+    require(isVIP(owner));
     caseTicket memory ticket = s_caseTickets[owner];
     require(_ticketOwnership(msg.sender)==0 , "A VIP user or a ticket owner can not buy a ticket");
     require(ticket.spender == address(this), "Ticket is not currently avaliable");
@@ -457,19 +433,19 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   * @notice Function used to return every ticket that are currently on sale
   */
    function getTicketsOnSale() public override view returns(caseTicket[] memory) {
-    uint arrayLength;
+    uint256 arrayLength;
     
-    for(uint i=0; i<s_racksMembers.length;i++){
+    for(uint256 i=0; i<s_racksMembers.length;i++){
       caseTicket memory ticket = s_caseTickets[s_racksMembers[i]];
-      if(ticket.spender==address(this) && isVip(ticket.owner)){
+      if(ticket.spender==address(this) && isVIP(ticket.owner)){
         arrayLength+=1;
       }
     }
     caseTicket[] memory tickets = new caseTicket[](arrayLength);
-    uint indexCount;
+    uint256 indexCount;
     for(uint256 i = 0; i < s_racksMembers.length; i++){
       caseTicket memory ticket = s_caseTickets[s_racksMembers[i]];
-      if(ticket.spender==address(this) && isVip(ticket.owner)){
+      if(ticket.spender==address(this) && isVIP(ticket.owner)){
         tickets[indexCount]=ticket;
         indexCount++;
       }
@@ -487,7 +463,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   * @dev - Require users MrCrypro's balance is > '
   * - Require that RacksMembers user's attribute is true
   */
-  function isVip(address user) public override view returns(bool) {
+  function isVIP(address user) public override view returns(bool) {
     if((MR_CRYPTO.balanceOf(user)>0) && (s_gotRacksMembers[user])) {
       return true;
     } else{
@@ -512,7 +488,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
       if((MR_CRYPTO.balanceOf(user)>0)) { //Case user is new and owns MrCrypto -> set member + ticket
           s_gotRacksMembers[user] = true;
           s_racksMembers.push(user);
-           s_caseTickets[user].owner=user;
+          s_caseTickets[user].owner=user;
           s_caseTickets[user].spender=user;
       } else{ // Case user is new and not owns MrCrypto -> just set member
           s_gotRacksMembers[user] = true;
@@ -520,7 +496,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
     } 
   }
 
-  /**
+    /**
   * @notice Set RacksMember attribute as true for a list of users that are Members (array)
   * @dev Only callable by the Owner
   * Require comented because maybe owner or admin are trying to set as true some address that was already set as true
@@ -530,18 +506,35 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
       if(s_gotRacksMembers[users[i]] == false) { // Case user is new RacksMember 
         if((MR_CRYPTO.balanceOf(users[i]) > 0)) { //Case user is new and owns MrCrypto -> set member + ticket
           s_gotRacksMembers[users[i]] = true;
-          s_racksMembers.push(users[i]);
-          s_caseTickets[users[i]].owner=users[i];
-          s_caseTickets[users[i]].spender=users[i];
-
+          s_caseTickets[user].owner=user;
+          s_caseTickets[user].spender=user;
+          
         } else{ // Case user is new and not owns MrCrypto -> just set member
           s_gotRacksMembers[users[i]] = true;
       }
     } 
     }
   }
-  function memberList() public override view returns(address [] memory){
-    return s_racksMembers;
+
+  /**
+    * @notice Returns all the VIP users
+   */
+  function VIPList() public override view returns(address [] memory){
+    uint256 arrayLength;
+    for(uint256 i =0; i< s_racksMembers.length; i++){
+      if(isVIP(s_racksMembers[i])){
+        arrayLength ++;
+      }
+    }
+    address [] memory members = new address [](arrayLength);
+    uint256 indexCount;
+    for(uint256 j =0; j< s_racksMembers.length; j++){
+      if(isVIP(s_racksMembers[j])){
+        members[indexCount]=s_racksMembers[j];
+        indexCount+=1;
+      }
+    }
+    return members;
   }
   /**
   * @notice Set RacksMember attribute as false for a user that was Racks Member before but it is not now
@@ -630,20 +623,31 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
     racksToken.transfer(wallet, amount);
   }
 
-  /**
-  * @notice Used to withdraw ALL funds
-  * @dev 
-  * - Only owner is able to call this function
-  * - Should check that there are avaliable funds to withdraw
-  * - Should specify the wallet address you want to transfer the funds to
-  */
-  function withdrawAllFunds(address wallet) public onlyOwner {
-    require(racksToken.balanceOf(address(this)) > 0, "No funds to withdraw");
-    racksToken.transfer(wallet, racksToken.balanceOf(address(this)));
-  }
 
-  /// @notice Receive function
-  function receiveFunds() external override payable {
+  /**
+    *@notice Returns all the items the case can drop
+   */
+  function caseLiquidity() public view returns(uint256[] memory){
+    uint256 arrayLength;
+    for(uint256 i=0; i< s_tokenCount; i++){
+      if(balanceOf(address(this), i)>0 ){
+        arrayLength++;
+      }
+    }
+
+    uint256 [] memory items = new uint256[](arrayLength);
+    uint256 indexCount;
+    for(uint256 j=0; j< s_tokenCount; j++){
+      if(balanceOf(address(this), j)>0 ){
+        items[indexCount]=j;
+        indexCount++;
+
+      }
+    }
+
+    return items;
+
+
   }
  
 
@@ -678,7 +682,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   function _mintSupply(address receiver, uint256 amount) internal {
       _mint(receiver, s_tokenCount, amount, "");
       _setMaxSupply(s_tokenCount, amount);
-      s_maxTotalSupply += amount;
+      maxTotalSupply += amount;
       s_tokenCount += 1;
   }
 
@@ -693,7 +697,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
     *@notice Assert thath a item is still owned and approved by its owner
   */
 
-  function _itemStillAvailable(address owner, uint tokenId) internal view returns(bool){
+  function _itemStillAvailable(address owner, uint256 tokenId) internal view returns(bool){
     if(balanceOf(owner, tokenId)>0 ){
       return true;
     }else{
@@ -704,7 +708,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   *@notice Check if someone has a tickket 
  */
   function _ownsTicket(address user) internal view returns(bool){
-      if((_ticketOwnership(user)==1 && isVip(user) )|| (_ticketOwnership(user)==2 && _durationLeft(user)>0 && _triesLeft(user)>0 )){
+      if((_ticketOwnership(user)==1 && isVIP(user) )|| (_ticketOwnership(user)==2 && _durationLeft(user)>0 && _triesLeft(user)>0 )){
         return true;
       }else{
         return false;
@@ -713,12 +717,12 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   /**
     *@notice Checks if someone is owning, selling, borrowing or lending a ticket, returns 0 else
   */
-    function _ticketOwnership(address user) internal view returns(uint){//1 for owner, 2 for borrower, 3 for lending, 4 for seller, 0 else
+    function _ticketOwnership(address user) internal view returns(uint256){//1 for owner, 2 for borrower, 3 for lending, 4 for seller, 0 else
  
-     uint ownerOrSpender=0;
+     uint256 ownerOrSpender=0;
 
-     for(uint i=0; i<s_racksMembers.length; i++){
-       if(s_caseTickets[s_racksMembers[i]].owner==user && s_caseTickets[s_racksMembers[i]].spender==user && isVip(user)){
+     for(uint256 i=0; i<s_racksMembers.length; i++){
+       if(s_caseTickets[s_racksMembers[i]].owner==user && s_caseTickets[s_racksMembers[i]].spender==user && isVIP(user)){
          ownerOrSpender=1; 
         break;
        }
@@ -744,13 +748,13 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
     *If ticket's use time is over returns 0
   */
   function _durationLeft(address user) internal view returns(uint256){
-     uint durationLeft=0;
+     uint256 durationLeft=0;
     if(_ticketOwnership(user)==2 || _ticketOwnership(user)==3 || _ticketOwnership(user)==4){
-      for(uint i=0; i< s_racksMembers.length; i++){
+      for(uint256 i=0; i< s_racksMembers.length; i++){
 
         if(s_caseTickets[s_racksMembers[i]].owner == user || s_caseTickets[s_racksMembers[i]].spender == user){
 
-         uint duration = s_caseTickets[s_racksMembers[i]].duration * 1 hours;
+         uint256 duration = s_caseTickets[s_racksMembers[i]].duration * 1 hours;
          bool over = block.timestamp >  s_caseTickets[s_racksMembers[i]].timeWhenSold + duration ? true : false;
     
          if(!over){
@@ -773,12 +777,12 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
 
   */
   function _triesLeft(address user) internal view returns (uint256){
-     uint triesLeft=0;
+     uint256 triesLeft=0;
       if(_ticketOwnership(user)==2 || _ticketOwnership(user)==3 || _ticketOwnership(user)==4){
-        for(uint i=0; i<s_racksMembers.length; i++){
+        for(uint256 i=0; i<s_racksMembers.length; i++){
           
         if(s_caseTickets[s_racksMembers[i]].owner == user || s_caseTickets[s_racksMembers[i]].spender == user){
-         uint duration = s_caseTickets[s_racksMembers[i]].duration * 1 hours;
+         uint256 duration = s_caseTickets[s_racksMembers[i]].duration * 1 hours;
          bool over = block.timestamp >  s_caseTickets[s_racksMembers[i]].timeWhenSold + duration ? true : false;
          if(!over){
            triesLeft =  s_caseTickets[s_racksMembers[i]].numTries;

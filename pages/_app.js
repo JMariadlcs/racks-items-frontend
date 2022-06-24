@@ -6,10 +6,12 @@ import { useEffect, useState } from 'react'
 
 
 function MyApp({ Component, pageProps }) {
-  const [walletConnected, setWalletConnected] = useState(false)
+  const [walletConnected, setWalletConnected] = useState()
   const [userAddress , setUserAddress] = useState()
   useEffect(()=>{
+
     if(window.ethereum){
+      
       window.ethereum.on("accountsChanged", (accounts) => {
       setWalletConnected(false)
       requestAccounts()
@@ -31,6 +33,7 @@ function MyApp({ Component, pageProps }) {
       if(account.length){
       setWalletConnected(true)
       setUserAddress(account)}
+      
     }catch{
       console.log("Error connecting...")
     }
