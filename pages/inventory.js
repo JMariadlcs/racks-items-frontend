@@ -13,6 +13,7 @@ import RacksItemsv3 from '../build/contracts/RacksItemsv3.json'
 
 import { render } from 'react-dom'
 
+
 export default function Inventory({user, userConnected}) {
   const [searchWallet, setSearchWallet] = useState()
   const [showMarketInventory, setShowMarketInventory] = useState(false)
@@ -29,6 +30,7 @@ export default function Inventory({user, userConnected}) {
   const [loadingState, setLoadingState] = useState('not-loaded')
   useEffect(() => {
     loadItems()
+      .then(console.log)
     if (window.ethereum) {
       window.ethereum.on("accountsChanged", (accounts) => {
         setProcessing(false)
@@ -115,10 +117,11 @@ export default function Inventory({user, userConnected}) {
     const signer = provider.getSigner()
     const marketContract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
 
-    const rarity = await marketContract.rarityOfItem(tokenId);
+    const totalSupply = await marketContract.totalSupply();
     const supply = await marketContract.supplyOfItem(tokenId);
+    const rarity = totalSupply.toNumber()/supply.toNumber()
 
-    setFetchedData({rarity: rarity.toNumber(),supply: supply.toNumber()})
+    setFetchedData({rarity,supply: supply.toNumber()})
    
 
 
@@ -189,6 +192,7 @@ export default function Inventory({user, userConnected}) {
         let item = {
           tokenId: itemCounter
         }
+       
        
 
         items.push(

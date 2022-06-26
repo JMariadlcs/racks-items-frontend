@@ -4,13 +4,13 @@
 
 pragma solidity ^0.8.0;
 import "./IRacksItems.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol"; // define roles
-import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol"; // erc1155 tokens
-import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol"; // contract should be ERC1155 holder to receive ERC1155 tokens
-import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol"; // to instanciate MrCrypto object
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol"; // to work with RacksToken
-import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol"; // to work with COORDINATOR and VRF
-import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol"; // to use functionalities for Chainlink VRF
+import "../node_modules/@openzeppelin/contracts/access/AccessControl.sol"; // define roles
+import "../node_modules/@openzeppelin/contracts/token/ERC1155/ERC1155.sol"; // erc1155 tokens
+import "../node_modules/@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol"; // contract should be ERC1155 holder to receive ERC1155 tokens
+import "../node_modules/@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol"; // to instanciate MrCrypto object
+import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol"; // to work with RacksToken
+import "../node_modules/@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol"; // to work with COORDINATOR and VRF
+import "../node_modules/@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol"; // to use functionalities for Chainlink VRF
 
 contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VRFConsumerBaseV2 { // VRFv2SubscriptionManager
    
@@ -154,7 +154,7 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
   function openCase() public override ownsTicket(msg.sender) supplyAvaliable contractIsActive  {  
     racksToken.transferFrom(msg.sender, address(this), casePrice);
     uint256 randomNumber = _randomNumber()  % totalSupply;
-    uint256 [] itemsList = caseLiquidity();
+    uint256 [] memory itemList = caseLiquidity();
     uint256 totalCount = 0;
     uint256 item;
 
@@ -506,8 +506,8 @@ contract RacksItemsv3 is  ERC1155, ERC1155Holder, IRacksItems, AccessControl, VR
       if(s_gotRacksMembers[users[i]] == false) { // Case user is new RacksMember 
         if((MR_CRYPTO.balanceOf(users[i]) > 0)) { //Case user is new and owns MrCrypto -> set member + ticket
           s_gotRacksMembers[users[i]] = true;
-          s_caseTickets[user].owner=user;
-          s_caseTickets[user].spender=user;
+          s_caseTickets[users[i]].owner=users[i];
+          s_caseTickets[users[i]].spender=users[i];
           
         } else{ // Case user is new and not owns MrCrypto -> just set member
           s_gotRacksMembers[users[i]] = true;

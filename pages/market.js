@@ -48,14 +48,13 @@ export default function Market({user, userConnected}) {
     const balance = await tokenContract.balanceOf(account)
     const userBalance = balance.toNumber()
     setUserBalance(userBalance)
-    console.log(userBalance)
-
-
-    const rarity = await marketContract.rarityOfItem(tokenId);
-    const supply = await marketContract.supplyOfItem(tokenId);
-
-    setFetchedData({rarity: rarity.toNumber(),supply: supply.toNumber()})
    
+
+    const totalSupply = await marketContract.totalSupply();
+    const supply = await marketContract.supplyOfItem(tokenId);
+    const rarity = totalSupply.toNumber()/supply.toNumber()
+
+    setFetchedData({rarity,supply: supply.toNumber()})
 
 
   }

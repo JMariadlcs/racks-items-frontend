@@ -42,15 +42,12 @@ interface IRacksItems {
   
   function getUserTicket(address user) external view returns(uint256 durationLeft, uint256 triesLeft, uint256 ownerOrSpender , uint256 ticketPrice);
 
-
   function openCase() external;
 
   function supplyOfItem(uint256 tokenId) external view returns(uint);
+
   function viewItems(address owner) external view returns(uint256[] memory);
 
-
-
- 
   function listItemOnMarket(uint256 marketItemId, uint256 price) external;
 
   
