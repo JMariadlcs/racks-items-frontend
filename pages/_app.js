@@ -8,8 +8,11 @@ import { useEffect, useState } from 'react'
 function MyApp({ Component, pageProps }) {
   const [walletConnected, setWalletConnected] = useState()
   const [userAddress , setUserAddress] = useState()
+  const [insideDapp , setInsideDapp] = useState(false)
   useEffect(()=>{
-
+    if(insideDapp){
+      requestAccounts()
+    }
     if(window.ethereum){
       
       window.ethereum.on("accountsChanged", (accounts) => {
@@ -33,6 +36,7 @@ function MyApp({ Component, pageProps }) {
       if(account.length){
       setWalletConnected(true)
       setUserAddress(account)}
+      setInsideDapp(true)
       
     }catch{
       console.log("Error connecting...")

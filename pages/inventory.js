@@ -14,15 +14,21 @@ import RacksItemsv3 from '../build/contracts/RacksItemsv3.json'
 import { render } from 'react-dom'
 
 
-export default function Inventory({user, userConnected}) {
+export default function Inventory() {
+  const [marketPrices,setMarketPrices] = useState([])
+  const [inventoryValue, setInventoryValue] = useState(0)
+  const [userAddress, setUserAddress] = useState()
+  const [marketContract,setMarketContract]= useState()
   const [searchWallet, setSearchWallet] = useState()
   const [showMarketInventory, setShowMarketInventory] = useState(false)
   const [showForm, setShowForm] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [processingPhase, setProcessingPhase] =  useState("")
   const [showItemData, setShowItemData] = useState(false);
   const [showModify, setShowModify] = useState(false)
-  const [fetchedData, setFetchedData] = useState({rarity:0, supply:0})
+  const [fetchedData, setFetchedData] = useState({rarity:0, supply:0, marketPrice:0})
   const [showCheckout, setShowCheckOut] = useState(false);
+  const [showDelete, setShowDelete] = useState(false)
   const [pickItem, setItem] = useState();
   const [formInput, updateFormInput] = useState({ price: 0})  
   const [items, setItems] = useState([])
@@ -30,7 +36,7 @@ export default function Inventory({user, userConnected}) {
   const [loadingState, setLoadingState] = useState('not-loaded')
   useEffect(() => {
     loadItems()
-      .then(console.log)
+     
     if (window.ethereum) {
       window.ethereum.on("accountsChanged", (accounts) => {
         setProcessing(false)
@@ -40,43 +46,70 @@ export default function Inventory({user, userConnected}) {
         loadItems()
     
     })}
+    if(marketContract){
+    marketContract.on("itemBought", ( buyer,  seller, marketItemId,  price) => {
+      if(seller==userAddress){
+        loadMarketInventory()
+      }
+      
+      
+    })
+  }
+
   
 
   },   [])
 
 
   async function exchangeItem(){
+    try{
     setProcessing(true)
-    const web3Modal = new Web3Modal()
-    const connection = await web3Modal.connect()
-    const provider = new ethers.providers.Web3Provider(connection)
-    const signer = provider.getSigner()
-    const marketContract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
+    setProcessingPhase("Haciendo pedido...")
     const transaction = await marketContract.exchangeItem(pickItem.tokenId)
+    setProcessingPhase("Quemando token...")
+
+
     await transaction.wait()
     setProcessing(false)
     setShowCheckOut(false)
     setShowForm(false)
     setShowItemData(false)
     loadItems()
+    setProcessingPhase("")
+    }catch{
+      setProcessing(false)
+      setProcessingPhase("")
+    }
 
 
   }
   async function listItem(){
-    setProcessing(true)
-    const web3Modal = new Web3Modal()
-    const connection = await web3Modal.connect()
-    const provider = new ethers.providers.Web3Provider(connection)
-    const signer = provider.getSigner()
-    const marketContract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
-    const transaction = await marketContract.listItemOnMarket(pickItem.tokenId, formInput.price.toString())
-    await transaction.wait()
-    setProcessing(false)
-    setShowCheckOut(false)
-    setShowForm(false)
-    setShowItemData(false)
-    loadItems()
-
+    if(formInput.price<=0){
+      alert("Precio no valido")
+    }
+    else{
+      try{
+        setProcessing(true)
+        setProcessingPhase("Listando item en el mercado...")
+        const transaction = await marketContract.listItemOnMarket(pickItem.tokenId, formInput.price.toString())
+        await transaction.wait()
+        setProcessingPhase("COMPLETADO")
+        setProcessing(false)
+        setShowCheckOut(false)
+        setShowForm(false)
+        setShowItemData(false)
+        setProcessingPhase("")
+        loadItems()
+    }catch{
+        setProcessing(false)
+        setShowCheckOut(false)
+      
+        setShowItemData(false)
+        loadItems()
+        setProcessingPhase("")
+    
+    }
+  }
 
 
   }
@@ -90,38 +123,77 @@ export default function Inventory({user, userConnected}) {
     setItem(item)
     setShowModify(!showModify)
   }
+  function renderDelete(item){
+    setItem(item)
+    setShowDelete(!showDelete)
+  }
   function renderCheckout(item){
     setItem(item)
     setShowCheckOut(!showCheckout)
   }
   async function modifyItem(item){
-    setProcessing(true)
-    const web3Modal = new Web3Modal()
-    const connection = await web3Modal.connect()
-    const provider = new ethers.providers.Web3Provider(connection)
-    const signer = provider.getSigner()
-    const marketContract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
-    const transaction = await marketContract.changeMarketItem(pickItem.tokenId, formInput.price.toString())
-    await transaction.wait()
-    setProcessing(false)
-    setShowCheckOut(false)
-    setShowForm(false)
-    setShowItemData(false)
-    loadItems()
+    console.log(formInput.price)
+    if(formInput.price==0){
+      try{
+        setProcessing(true)
+        setProcessingPhase("Retirando del mercado...")
+        const transaction = await marketContract.changeMarketItem(pickItem.tokenId, "0")
+        await transaction.wait()
+        setProcessingPhase("COMPLETADO")
+        setShowCheckOut(false)
+        setProcessing(false)
+        setShowForm(false)
+        setShowItemData(false)
+        loadItems()
+        setProcessingPhase("")
+
+      }catch{
+       
+        setProcessing(false)
+        setProcessingPhase("")
+
+      }
+    }else{
+      try{
+        setProcessing(true)
+        setProcessingPhase("Modificando precio...")
+        const transaction = await marketContract.changeMarketItem(pickItem.tokenId, formInput.price.toString())
+        await transaction.wait()
+        setProcessingPhase("COMPLETADO")
+        setShowCheckOut(false)
+        setProcessing(false)
+        setShowForm(false)
+        setShowItemData(false)
+        loadItems()
+        setProcessingPhase("")
+
+      }catch{
+       
+        setProcessing(false)
+        setProcessingPhase("")
+
+      }
+    }
+    
 
   }
   async function fetchItemData(tokenId){
-    const web3Modal = new Web3Modal()
-    const connection = await web3Modal.connect()
-    const provider = new ethers.providers.Web3Provider(connection)
-    const signer = provider.getSigner()
-    const marketContract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
-
     const totalSupply = await marketContract.totalSupply();
     const supply = await marketContract.supplyOfItem(tokenId);
     const rarity = totalSupply.toNumber()/supply.toNumber()
+    const prices = await marketContract.getItemsOnSale()
+    let totalItems=0;
+    let totalPrice=0;
+    const items = await Promise.all(prices
+      .filter(item=> item.tokenId.toNumber()== tokenId)
+      .map(async i => {
+        const itemPrice = i.price.toNumber()
+        totalPrice += itemPrice
+        totalItems +=1
+    }))
+    const marketPrice = totalPrice/totalItems
 
-    setFetchedData({rarity,supply: supply.toNumber()})
+    setFetchedData({rarity,supply: supply.toNumber() , marketPrice})
    
 
 
@@ -142,14 +214,12 @@ export default function Inventory({user, userConnected}) {
     const provider = new ethers.providers.Web3Provider(connection)
     const signer = provider.getSigner()
     const account = await signer.getAddress()
-    const contract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
-
-    const data = await contract.getItemsOnSale()
+    
+    const data = await marketContract.getItemsOnSale()
     
     const items = await Promise.all(data
       .filter(item=> item.itemOwner == account)
       .map(async i => {
-      // const tokenUri = await contract.tokenURI(i.tokenId) hacerlo en variable
       
       let price=i.price.toString()
 
@@ -171,18 +241,42 @@ export default function Inventory({user, userConnected}) {
   }
   
   async function loadItems() {
-
+    setLoadingState('not-loaded')
+    setMarketPrices([])
+    setInventoryValue(0)
     setShowMarketInventory(false)
     const web3Modal = new Web3Modal()
     const connection = await web3Modal.connect()
     const provider = new ethers.providers.Web3Provider(connection)
     const signer = provider.getSigner()
     const account = await signer.getAddress()
-
+    let _inventoryValue = 0
+    setUserAddress(account)
     const contract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
+    setMarketContract(contract)
+    const prices = await contract.getItemsOnSale()
+      const _marketPrices = []
+      for(let j=0; j<itemList.length; j++){
+        let totalItems=0;
+        let totalPrice=0;
+      const itemPrices = await Promise.all(prices
+      .filter(item=> item.tokenId.toNumber()== j)
+      .map(async i => {
+        const itemPrice = i.price.toNumber()
+        totalPrice += itemPrice
+        totalItems +=1
+       }))
+       _marketPrices[j] = totalPrice/totalItems
+
+      }
+      setMarketPrices(_marketPrices)
+
+
+
+
     const data = await contract.viewItems(account);
-   let itemCounter=0;
-   let items = []
+    let itemCounter=0;
+    let items = []
     await Promise.all(data.map(async i=> {
       let counter = 0;
       let amount =  i.toNumber()
@@ -192,6 +286,10 @@ export default function Inventory({user, userConnected}) {
         let item = {
           tokenId: itemCounter
         }
+        if(!isNaN(marketPrices[item.tokenId])){
+        _inventoryValue += marketPrices[item.tokenId]
+        }
+        
        
        
 
@@ -206,8 +304,9 @@ export default function Inventory({user, userConnected}) {
         
         
       }))
-    
-   
+      
+    setInventoryValue(_inventoryValue)
+    console.log(_inventoryValue)
     setItems(items)
     setLoadingState('loaded') 
   
@@ -218,6 +317,7 @@ export default function Inventory({user, userConnected}) {
       loadItems()
 
     }else{
+    
     const web3Modal = new Web3Modal()
     const connection = await web3Modal.connect()
     const provider = new ethers.providers.Web3Provider(connection)
@@ -225,9 +325,10 @@ export default function Inventory({user, userConnected}) {
     
 
     const contract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
-    
+    let _inventoryValue = 0
       setLoadingState("not-loaded")
       try{
+      setInventoryValue(0)
       const data = await contract.viewItems(account);
       let itemCounter=0;
       let items = []
@@ -241,6 +342,9 @@ export default function Inventory({user, userConnected}) {
           tokenId: itemCounter,
         
         }
+        if(!isNaN(marketPrices[item.tokenId])){
+          _inventoryValue += marketPrices[item.tokenId]
+        }
 
         items.push(
             item
@@ -252,7 +356,7 @@ export default function Inventory({user, userConnected}) {
         
       }))
     
-   
+    setInventoryValue(_inventoryValue)
     setItems(items)
   }catch{
     setItems([])
@@ -276,11 +380,10 @@ export default function Inventory({user, userConnected}) {
         <div onClick={()=>loadItems()}  className='bg-main w-24 flex justify-center cursor-pointer items-center h-8  '>Inventario</div>
         <div onClick={()=>loadMarketInventory()}  className='bg-main w-24 flex justify-center cursor-pointer items-center h-8 '>En venta</div>
       </div>
-      <div className='m-4 md:w-72 lg:w-96 '>
-        <input onChange={(e)=> {setSearchWallet(e.target.value); loadExternalInventory(e.target.value)}}  type="text" className="w-full px-4 py-2 text-white bg-main outline-none" placeholder='Buscar wallet'  ></input>
-        
-
+      <div className='flex m-4 md:w-72 lg:w-96 '>
+        <input onChange={(e)=> {setSearchWallet(e.target.value); loadExternalInventory(e.target.value)}}  type="text" className="w-full px-4 py-2 text-white bg-main outline-none" placeholder='Buscar wallet'  ></input>  <label className=" text-xs flex items-center text-white bg-main">{inventoryValue.toFixed(2)} RKS</label>
       </div>
+   
       </div>
 
     {(loadingState!=='loaded')&& (
@@ -352,7 +455,7 @@ export default function Inventory({user, userConnected}) {
                           <p className='flex justify-center text-sm font-bold'>{itemList[item.tokenId].name}</p>
                           <p className="text-red flex justify-center font-semibold" >{item.price} RKS (EN VENTA)</p>
                           <button onClick={()=>renderModifier(item)} className='px-4 py-2 bg-soft w-1/2'>Modificar</button>
-                          <button className='px-4 py-2 bg-main w-1/2'>Retirar</button>
+                          <button onClick={()=>renderDelete(item)} className='px-4 py-2 bg-main w-1/2'>Retirar</button>
                          <img src="/racksLogoDos.png" height="20" width="50" className='mb-4 mt-4'/> 
     
                           
@@ -384,7 +487,7 @@ export default function Inventory({user, userConnected}) {
 <div class="rightside">
   <form action="">
      
-    <div className='flex justify-between'><h1 className='font-semibold'>{itemList[pickItem.tokenId].name}</h1><button onClick={()=>{setProcessing(false);setShowCheckOut(false);setShowForm(false) ;setShowItemData(false);}}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+    <div className='flex justify-between'><h1 className='font-semibold'>{itemList[pickItem.tokenId].name}</h1><button onClick={()=>setShowModify(false)}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
 <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
 </svg></button></div>
     <h2 className='text-soft'>Modelo exclusivo de Racks Items</h2>
@@ -400,11 +503,15 @@ export default function Inventory({user, userConnected}) {
 </div>
    {
          processing ? (
+            <div >
            <div  className="button flex justify-center bg-red-40 "> <div class="vender"><div></div><div></div><div></div></div></div>
+           <div className='text-soft flex flex-col w-full items-center pt-4'> {processingPhase} </div>
+           
+            </div>
     
 
          ):(
-         <div onClick={()=>modifyItem(pickItem)} className="button cursor-pointer flex justify-center bg-red hover:bg-red/40">Cambiar precio</div>)
+         <div onClick={()=>modifyItem(pickItem)} className="button cursor-pointer flex justify-center bg-orange hover:bg-orange/40">Cambiar precio</div>)
        }
 
    
@@ -423,6 +530,72 @@ export default function Inventory({user, userConnected}) {
 </div>
   </div>
       )}
+    {
+      showDelete &&(
+        
+        <div className=' w-full flex flex-col justify-center items-center fixed'> 
+        <div className='flex '>
+
+<div className='flex flex-col h-screen w-full sticky top-0'>
+<div class="mainscreen  ">
+  
+
+<div class="card">
+
+<div class="leftside">
+  <img
+    src={itemList[pickItem.tokenId].imageSrc}
+    className="product m-8"
+  
+  />
+</div>
+<div class="rightside">
+  <form action="">
+     
+    <div className='flex justify-between'><h1 className='font-semibold'>{itemList[pickItem.tokenId].name}</h1><button onClick={()=>setShowDelete(false)}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+<path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+</svg></button></div>
+    <h2 className='text-soft'>Modelo exclusivo de Racks Items</h2>
+    
+    
+
+  
+<div class="expcvv">
+
+
+  
+</div>
+   {
+         processing ? (
+            <div >
+           <div  className="button flex justify-center bg-red-40 "> <div class="vender"><div></div><div></div><div></div></div></div>
+           <div className='text-soft flex flex-col w-full items-center pt-4'> {processingPhase} </div>
+           
+            </div>
+    
+
+         ):(
+         <div onClick={()=>{ updateFormInput(0);modifyItem(pickItem)}} className="button cursor-pointer flex justify-center bg-red hover:bg-red/40">Retirar</div>)
+       }
+
+   
+  </form>
+</div>
+</div>
+</div>
+
+
+</div>
+
+
+
+
+    
+</div>
+  </div>
+
+      )
+    }
     {showForm && (
         <div className=' w-full flex flex-col justify-center items-center fixed'> 
         <div className='flex '>
@@ -459,8 +632,10 @@ export default function Inventory({user, userConnected}) {
 </div>
    {
          processing ? (
+          <div>
            <div  className="button flex justify-center bg-red-40 "> <div class="vender"><div></div><div></div><div></div></div></div>
-    
+           <div className='text-soft flex flex-col w-full items-center pt-4'> {processingPhase} </div>
+          </div>
 
          ):(
          <div onClick={()=>listItem(pickItem)} className="button cursor-pointer flex justify-center bg-red hover:bg-red/40">Vender</div>)
@@ -521,8 +696,10 @@ export default function Inventory({user, userConnected}) {
                 </div>
                     {
                       processing ? (
-                        <div  className="button flex justify-center bg-orange-40 "> <div class="canjear"><div></div><div></div><div></div></div>
-                      </div>
+                        <div>
+                            <div  className="button flex justify-center bg-orange-40 "> <div class="canjear"><div></div><div></div><div></div></div></div>
+                            <div className='flex flex-col w-full items-center text-soft'>{processingPhase}</div>
+                        </div>
 
                       ):(
                       <div onClick={exchangeItem} className="button cursor-pointer flex justify-center bg-orange hover:bg-orange/40">Hacer pedido
@@ -569,6 +746,16 @@ export default function Inventory({user, userConnected}) {
                         <p className='text-soft '>Categoría:<label className={`${itemList[pickItem.tokenId].textColor} m-2 font-semibold`} >{itemList[pickItem.tokenId].rarity}  </label></p>
                  <p className='text-soft'>Probabilidad:<label className="text-main ml-2 font-semibold" >{(100/fetchedData.rarity).toFixed(2)}% </label></p>
                  <p className='text-soft'>En circulación:<label className="text-main ml-2 font-semibold" >{fetchedData.supply} </label></p>
+                 {
+                  fetchedData.marketPrice>0?(
+                    <p className='text-soft'>Precio de mercado: <label className="text-main ml-2 font-semibold">{fetchedData.marketPrice.toFixed(2)} RKS</label></p>
+
+                  ):(
+                    <p className='text-soft'>Precio de mercado: <label className="text-main ml-2 font-semibold">No disponible</label></p>
+
+                  )
+                 }
+                
 
                 </div>
               </div>

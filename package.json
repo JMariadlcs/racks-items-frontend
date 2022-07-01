@@ -1,6 +1,6 @@
 {
   "name": "racs-items",
-  "main":"server.js",
+  "main": "server.js",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,8 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "deploy": "firebase deploy --only functions,hosting",
-    "start": "next start"
+    "deploy": "firebase deploy --only functions,hosting"
   },
   "dependencies": {
     "@chainlink/contracts": "^0.4.1",
@@ -18,7 +17,9 @@
     "axios": "^0.27.2",
     "ethers": "^5.6.7",
     "firebase": "^9.8.1",
-    "next": "12.1.6",
+    "js-ipfs-fetch": "^4.0.0",
+    "next": "^12.2.0",
+    "nextjs-progressbar": "^0.0.14",
     "react": "18.1.0",
     "react-dom": "18.1.0",
     "web3modal": "^1.9.7"

@@ -19,6 +19,7 @@ export default function Market({user, userConnected}) {
   const router = useRouter()
   const [userBalance, setUserBalance]= useState(0)
   const [processing, setProcessing] = useState(false);
+  const [processingPhase, setProcessingPhase] = useState("")
   const [showItemData, setShowItemData] = useState(false);
   const [fetchedData, setFetchedData] = useState({rarity:0, supply:0})
   const [pickItem, setItem] = useState();
@@ -92,11 +93,24 @@ export default function Market({user, userConnected}) {
     const Tokencontract = new ethers.Contract(tokenAddress,RacksToken.abi, signer)
     const marketContract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
     
+    setProcessingPhase("Aprovando token...")
+    try{
     const approval = await Tokencontract.approve(commerceAddress, item.price.toString())
+    await approval.wait()
+    setProcessingPhase("Realizando pago...")
     const transaction = await marketContract.buyItem(item.marketItemId ,{gasLimit : 3000000})
     await transaction.wait()
-    setProcessing(true)
-    router.push("/inventory")
+    setProcessingPhase("COMPLETADO")
+    setProcessing(false)
+    setShowItemData(false)
+    loadItems()
+    }catch{
+      setProcessingPhase("")
+      setProcessing(false)
+     
+    
+
+    }
     }
     
   }
@@ -222,7 +236,10 @@ export default function Market({user, userConnected}) {
            
                 {
                        processing ? (
+                        <div>
                         <div  className="button flex justify-center bg-pink-40 "> <div class="comprar "><div></div><div></div><div></div></div></div>
+                        <div className='text-soft flex flex-col w-full items-center pt-4'> {processingPhase} </div>
+                        </div>
                  
              
                       ): (userBalance<pickItem.price)?

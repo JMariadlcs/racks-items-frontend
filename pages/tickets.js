@@ -14,6 +14,7 @@ import RacksItemsv3 from '../build/contracts/RacksItemsv3.json'
 import RacksToken from '../build/contracts/RacksToken.json'
 
 export default function Tickets({user, userConnected}) {
+  const [profilePic , setProfilePic]= useState("")
   const [ticketUser, setUser]= useState()
   const [ticket, setTicket] = useState({})
   const [ticketState, setTicketState]= useState({})
@@ -36,18 +37,30 @@ export default function Tickets({user, userConnected}) {
     const contract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
     const account = await signer.getAddress()
     const data = await contract.getUserTicket(account)
-    const {0: durationLeft, 1: triesLeft, 3:ownerOrSpender, 4:ticketPrice} = data;
+    const {0: durationLeft, 1: triesLeft, 2:ownerOrSpender, 3:ticketPrice} = data;
+    const userTicket = {
+     durationLeft: data.durationLeft.toNumber(),
+     triesLeft : data.triesLeft.toNumber(),
+     ownerOrSpender : data.ownerOrSpender.toNumber(),
+     ticketPrice : data.ticketPrice.toNumber()
+    }
     
     setUser(account)
-    setTicket(data)
+    setTicket(userTicket)
     
     
-
+    if(ticket.ownerOrSpender!=0 && ticket.ownerOrSpender!=3){
+      const response =await fetch("https://arweave.net/u2pCDNJIPg8-yfI00u5V_kfqpR5c952nqoOLEM2_mXE")
+      const data = await response.json()
+      const URI = data.image
+      setProfilePic(URI)
+      console.log(data)
+    }
    
     if(ticket.durationLeft==0 ||ticket.triesLeft==0){
       setTicketState({color:"bg-red", message:"Caducado"})
     }else{
-      setTicketState({color:"bg-green", message:"En uso"})
+      setTicketState({color:"bg-green", message:"Activo"})
     }
 
   }
@@ -63,6 +76,7 @@ export default function Tickets({user, userConnected}) {
     
   
     const transaction = await contract.approve(commerceAddress,item.price.toString())
+    await transaction.wait()
 
     const transaction2 = await contract2.buyTicket(item.owner.toString());
     await transaction2.wait()
@@ -130,30 +144,49 @@ export default function Tickets({user, userConnected}) {
       <Sidebar/>
     <div className='flex w-full'>
     <h1 className="px-flex flex-col w-full md:w-1/2 items-center   justify-start 20 py-10 text-3xl">No hay tickets en venta</h1>
-    <div className='h-screen sticky top-0 bg-main hidden md:flex lg.flex flex-col border border-secondary w-1/2'>
-      <h1 className='text-3xl font-bold px-4 py-4 border-b border-secondary'>Racks <p className='font-whispers'>Tickets</p>:</h1>
-      <div>
+    <div className='h-screen sticky top-0  hidden md:flex lg.flex flex-col  py-32 px-16 secondary w-1/2'>
+
+      
+      <div className='bg-main rounded p-8 pb-32'>
+        
+          {(ticket.ownerOrSpender==2|| ticket.ownerOrSpender==0) ?(
+             <div className='flex flex-col md:flex-col lg:flex-row items-center space-x-8'>
+               <img src="/face.png" className='w-24 h-24 md:w-36 md:h-36 lg:w-48 lg:h-48 mb-16 '/>
+               <p className='pb-16 text-xl font-bold'>{user.substring(0,15)}...  </p>
+
+            </div>
+          ):(
+            <div className='flex flex-col md:flex-col lg:flex-row items-center space-x-8'>
+               <img src={profilePic} className='w-24 rounded-full h-24 md:w-36 md:h-36 lg:w-48 lg:h-48 mb-16 '/>
+               <p className='pb-16 text-xl font-bold'>{user.substring(0,15)}...  </p>
+
+            </div>
+          )}
+         
+       
         {
          ticket.ownerOrSpender==1?(
-           <div className='w-full mx-auto flex items-center px-16 justify-between  h-16 rounded'>
+           <div className='w-full mx-auto flex items-center  justify-between  h-16 rounded'>
               <div className='flex items-center'><div className='h-2 w-2 mr-4 rounded-full bg-orange '></div><p className='font-semibold'>VIP</p></div>
               <button className='bg-red rounded hover:bg-main  px-4 py-2' onClick={listTicket}>Vender ticket</button>
            </div>
          ): ticket.ownerOrSpender==2?(
-          <div className='w-full mx-auto flex items-center px-16 justify-between  h-16 rounded'>
+          <div className='w-full mx-auto flex flex-col  justify-between  h-16 rounded'>
              <div className='flex items-center'>
-               <div className={` h-2 w-2 mr-4 rounded-full  ${ticketState.color}`} ></div>
-            <p className='font-semibold'>En uso:{ticketState.message}
-            </p>
-          </div>
+               <p className='font-semibold'>Estado: En uso, {ticketState.message}</p>
+               <div className={` h-2 w-2 ml-4 rounded-full  ${ticketState.color}`} ></div>
+              </div>
+              <div className='font-semibold mb-4'>Tiradas de caja disponibles: {ticket.triesLeft}</div>
+              <div className='font-semibold'>El ticket se liquidará en : {ticket.durationLeft} horas</div>
            
           </div>
         ):ticket.ownerOrSpender==3?(
-          <div className='w-full mx-auto flex items-center px-16 justify-between  h-16 rounded'>
-             <div className='flex items-center'>
+          <div className='w-full mx-auto flex items-center  justify-between  h-16 rounded'>
+             <div className='flex flex-col justify-center'>
                <div className={` h-2 w-2 mr-4 rounded-full  ${ticketState.color}`} ></div>
             <p className='font-semibold'>Delegado:{ticketState.message}
             </p>
+            <p>Tiempo para la liquidación : {ticket.durationLeft} horas</p>
           </div>
            
           </div>
@@ -195,43 +228,62 @@ export default function Tickets({user, userConnected}) {
           }
          
     </div>
-    <div className='h-screen sticky top-0 bg-main/50 hidden md:flex lg.flex flex-col border border-secondary w-1/2'>
-      <div className='text-3xl  flex items-center font-bold px-4 py-4 border-b border-secondary'><img src="/racksLogoDos.png" className='h-8 w-36'/><p className='ml-8 neon font-bold text-3xl  font-whisper'>Tickets</p></div>
-      <div>
-        {
-         ticket.ownerOrSpender==1?(
-          <div className='w-full mx-auto flex items-center px-16 justify-between  h-16 rounded'>
-             <div className='flex items-center'><div className='h-2 w-2 mr-4 rounded-full bg-orange '></div><p className='font-semibold'>VIP</p></div>
-             <button className='bg-red rounded hover:bg-main  px-4 py-2' onClick={listTicket}>Vender ticket</button>
-          </div>
-        ): ticket.ownerOrSpender==2?(
-         <div className='w-full mx-auto flex items-center px-16 justify-between  h-16 rounded'>
-            <div className='flex items-center'>
-              <div className={` h-2 w-2 mr-4 rounded-full  ${ticketState.color}`} ></div>
-           <p className='font-semibold'>En uso:{ticketState.message}
-           </p>
-         </div>
-          
-         </div>
-       ):ticket.ownerOrSpender==3?(
-         <div className='w-full mx-auto flex items-center px-16 justify-between  h-16 rounded'>
-            <div className='flex items-center'>
-              <div className={` h-2 w-2 mr-4 rounded-full  ${ticketState.color}`} ></div>
-           <p className='font-semibold'>Delegado:{ticketState.message}
-           </p>
-         </div>
-          
-         </div>
-       ):ticket.ownerOrSpender==4?(
-         <div>
-           En venta
-         </div>
-       ):(<div>
-         No tienes permisos VIP
-       </div>)
-       }
+    <div className='h-screen sticky top-0  hidden md:flex lg.flex flex-col  py-32 px-16 secondary w-1/2'>
+
+    <div className='bg-main rounded p-8 pb-32'>
         
-      </div>
+        {(ticket.ownerOrSpender==2|| ticket.ownerOrSpender==0) ?(
+           <div className='flex flex-col md:flex-col lg:flex-row items-center space-x-8'>
+             <img src="/face.png" className='w-24 h-24 md:w-36 md:h-36 lg:w-48 lg:h-48 mb-16 '/>
+             <p className='pb-16 text-xl font-bold'>{user.substring(0,15)}...  </p>
+
+          </div>
+        ):(
+          <div className='flex flex-col md:flex-col lg:flex-row items-center space-x-8'>
+             <img src={profilePic} className='w-24 rounded-full h-24 md:w-36 md:h-36 lg:w-48 lg:h-48 mb-16 '/>
+             <p className='pb-16 text-xl font-bold'>{user.substring(0,15)}...  </p>
+
+          </div>
+        )}
+       
+     
+      {
+       ticket.ownerOrSpender==1?(
+         <div className='w-full mx-auto flex items-center  justify-between  h-16 rounded'>
+            <div className='flex items-center'><div className='h-2 w-2 mr-4 rounded-full bg-orange '></div><p className='font-semibold'>VIP</p></div>
+            <button className='bg-red rounded hover:bg-main  px-4 py-2' onClick={listTicket}>Vender ticket</button>
+         </div>
+       ): ticket.ownerOrSpender==2?(
+        <div className='w-full mx-auto flex flex-col  justify-between  h-16 rounded'>
+           <div className='flex items-center'>
+             <p className='font-semibold'>Estado: En uso, {ticketState.message}</p>
+             <div className={` h-2 w-2 ml-4 rounded-full  ${ticketState.color}`} ></div>
+            </div>
+            <div className='font-semibold mb-4'>Tiradas de caja disponibles: {ticket.triesLeft}</div>
+            <div className='font-semibold'>El ticket se liquidará en : {ticket.durationLeft} horas</div>
+         
+        </div>
+      ):ticket.ownerOrSpender==3?(
+        <div className='w-full mx-auto flex items-center  justify-between  h-16 rounded'>
+           <div className='flex flex-col justify-center'>
+             <div className={` h-2 w-2 mr-4 rounded-full  ${ticketState.color}`} ></div>
+          <p className='font-semibold'>Delegado:{ticketState.message}
+          </p>
+          <p>Tiempo para la liquidación : {ticket.durationLeft} horas</p>
+        </div>
+         
+        </div>
+      ):ticket.ownerOrSpender==4?(
+        <div>
+          En venta
+        </div>
+      ):(<div>
+        No tienes permisos VIP
+      </div>)
+      }
+
+    </div>
+
     </div>
     </div>
    
