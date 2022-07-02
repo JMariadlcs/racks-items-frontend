@@ -43,7 +43,9 @@ export default function Opencase({user, userConnected}) {
     })}
   
 
-  },   [])
+  },[])
+
+
   async function loadVipState(){
     
     const web3Modal = new Web3Modal()
@@ -59,7 +61,6 @@ export default function Opencase({user, userConnected}) {
     const items = await Promise.all(itemsData
       
       .map(async i => {
-      
        const item= i.toNumber()
 
       return item
@@ -68,8 +69,6 @@ export default function Opencase({user, userConnected}) {
     
     setCasePrice(casePrice.toNumber())
     const {0: durationLeft, 1: triesLeft, 3:ownerOrSpender, 4:ticketPrice} = data;
- 
-
     if(data[2].toNumber()==1 || data[2].toNumber()==2){
       setVipState(true)
     }
@@ -98,10 +97,10 @@ export default function Opencase({user, userConnected}) {
     }))
     const marketPrice = totalPrice/totalItems
     setFetchedData({rarity,supply: supply.toNumber(), marketPrice})
-   
-
 
   }
+
+
   async function renderItemData(item){
     
     await fetchItemData(item);
@@ -222,7 +221,6 @@ export default function Opencase({user, userConnected}) {
                     <div className='bg-main/70  flex flex-col items-center py-16 px-8 mt-36 border-main border rounded'>
                       <h1 className=' font-bold text-secondary text-3xl'>{processingPhase}</h1>
                       <p className='text-secondary mb-16'>Dependiendo de la demanda de la red puede tardar más de lo esperado.</p>
-                      
                           <div class="circle-loader mb-8">
                             <div></div>
                             <div></div>
@@ -242,54 +240,45 @@ export default function Opencase({user, userConnected}) {
           }
            {
              showItemData && (
-              <div className=' w-full flex flex-col justify-center items-center fixed  '> 
-                           
-                    
-                    
-                    <div class="mainscreen  ">
-                      
-              
+              <div className=' w-full flex flex-col justify-center items-center fixed  '>   
+                <div class="mainscreen  ">
                   <div class="card">
-                   
                     <div class="leftside">
-                      <img
-                        src={itemList[pickItem].imageSrc}
-                        className="product my-8"
-                      
-                      />
+                      <img src={itemList[pickItem].imageSrc} className="product my-8"/>
                     </div>
                     <div class="rightside">
-                      <div className='flex justify-between'><h1 className=' text-main text-xl font-semibold'>{itemList[pickItem].name}</h1><button onClick={()=>{setShowItemData(false) ;setProcessingPhase("")}}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                      <div className='flex justify-between'>
+                        <h1 className=' text-main text-xl font-semibold'>{itemList[pickItem].name}</h1>
+                        <button onClick={()=>{setShowItemData(false) ;setProcessingPhase("")}}>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
                               <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
-                            </svg></button></div>
-                      
+                          </svg>
+                        </button>
+                      </div>
                       <p className='text-soft '>Categoría:<label className={`${itemList[pickItem].textColor} m-2 font-semibold`} >{itemList[pickItem].rarity}  </label></p>
                       <p className='text-soft'>Probabilidad:<label className="text-main ml-2 font-semibold" >{(100/fetchedData.rarity).toFixed(2)}% </label></p>
                       <p className='text-soft'>En circulación:<label className="text-main ml-2 font-semibold" >{fetchedData.supply} </label></p>
                       {
-                              fetchedData.marketPrice>0?(
-                                <p className='text-soft'>Precio de mercado: <label className="text-main ml-2 font-semibold">{fetchedData.marketPrice.toFixed(2)} RKS</label></p>
+                         fetchedData.marketPrice>0?(
+                           <p className='text-soft'>Precio de mercado: <label className="text-main ml-2 font-semibold">{fetchedData.marketPrice.toFixed(2)} RKS</label></p>
 
-                              ):(
-                                <p className='text-soft'>Precio de mercado: <label className="text-main ml-2 font-semibold">No disponible</label></p>
+                         ):(
+                           <p className='text-soft'>Precio de mercado: <label className="text-main ml-2 font-semibold">No disponible</label></p>
 
-                              )
+                         )
                         }  
-                      <div onClick={()=>{setShowItemData(false); openCase()}} className="button cursor-pointer flex justify-center bg-red hover:bg-red/40">Abrir otra ({casePrice} RKS)
-                      </div>
+                      <div onClick={()=>{setShowItemData(false); openCase()}} className="button cursor-pointer flex justify-center bg-red hover:bg-red/40">Abrir otra ({casePrice} RKS) </div>
                       <Link href="/inventory">
-                      <div className="button cursor-pointer flex justify-center bg-orange hover:bg-orange/40">Inventario
-                      </div></Link>
+                        <div className="button cursor-pointer flex justify-center bg-orange hover:bg-orange/40">Inventario</div>
+                      </Link>
                     
                     </div>
                   </div>
                 </div>
-                    </div>
-                    
-                    )
+              </div>
+             )
           }
-                  
-          
+
         </div>
       </div>
        
