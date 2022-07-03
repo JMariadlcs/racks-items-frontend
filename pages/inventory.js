@@ -285,7 +285,6 @@ export default function Inventory() {
       }))
       
     setInventoryValue(_inventoryValue)
-    console.log(_inventoryValue)
     setItems(items)
     setLoadingState('loaded') 
   
@@ -354,13 +353,15 @@ export default function Inventory() {
         <div className='flex flex-col rounded mt-16 white-light'>
           <div className='flex flex-col md:flex-row lg:flex-row'>
             <div className='flex m-4 items-center'>
-              <div onClick={()=>loadItems()}  className='bg-main w-24 flex justify-center cursor-pointer items-center h-8  '>Inventario</div>
-              <div onClick={()=>loadMarketInventory()}  className='bg-main w-24 flex justify-center cursor-pointer items-center h-8 '>En venta</div>
+              <div onClick={()=>loadItems()}  className='bg-main w-36 flex justify-center cursor-pointer my-4 items-center h-8  '>Inventario</div>
+              <div onClick={()=>loadMarketInventory()}  className='bg-main my-4 w-36 flex justify-center cursor-pointer items-center h-8 '>En venta</div>
             </div>
             <div className='flex m-4 md:w-72 lg:w-96 '>
-              <input onChange={(e)=> {setSearchWallet(e.target.value); loadExternalInventory(e.target.value)}}  type="text" className="w-full px-4 py-2 text-white bg-main outline-none" placeholder='Buscar wallet'  ></input>  <label className=" text-xs flex items-center text-white bg-main">{inventoryValue.toFixed(2)} RKS</label>
+              <input onChange={(e)=> {setSearchWallet(e.target.value); loadExternalInventory(e.target.value)}}  type="text" className="w-full px-4 py-2 text-white bg-main outline-none" placeholder='Buscar wallet'  ></input>  
+                
             </div>
-   
+          <div className=" w-full md:w-48 lg:w-48 flex flex-row justify-center p-4  items-center "><label className='bg-main' >{inventoryValue.toFixed(2)} RKS</label></div>
+          
           </div>
           {(loadingState!=='loaded')&& (
             <div className = "flex w-full justify-center items-center">
@@ -381,9 +382,12 @@ export default function Inventory() {
           )}
   
           {!showMarketInventory?(
+           
+           
             <div className=" mt-4 grid  px-4 py-4 grid-cols-1 mx-auto my-auto md:grid-cols-3 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
               {
                 items.map((item, i) =>(
+                  
                   <div key={i} className='border  w-56 rounded border-main overflow-hidden  flex-col items-center bg-main/70' >
                     <div className={`absolute rounded w-2 h-8 bg-secondary ${itemList[item.tokenId].ticker}`}></div>
                       <img src={itemList[item.tokenId].imageSrc} onClick={()=>renderItemData(item)} className=" w-full cursor-pointer  my-8 h-48"/>
@@ -413,6 +417,7 @@ export default function Inventory() {
               ))}
             </div>):
               (
+                
                 <div className=" mt-4 grid  px-4 py-4 grid-cols-1 mx-auto my-auto md:grid-cols-3 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
                   {
                     items.map((item, i) =>(
@@ -424,7 +429,7 @@ export default function Inventory() {
                           <button onClick={()=>renderModifier(item)} className='px-4 py-2 bg-soft w-1/2'>Modificar</button>
                           <button onClick={()=>renderDelete(item)} className='px-4 py-2 bg-main w-1/2'>Retirar</button>
                         <img src="/racksLogoDos.png" height="20" width="50" className='mb-4 mt-4'/> 
-                      </div>
+                      </div> 
                    ))
                   }
                 </div>

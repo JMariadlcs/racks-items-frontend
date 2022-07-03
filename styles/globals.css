@@ -71,7 +71,7 @@
   }
 
   :root {
-    --clr-neon: hsl(317 100% 54%);
+    --clr-neon: rgb(169, 44, 134);
     --clr-bg: hsl(323 21% 16%);
     --clr-neon-blue:hsla(195, 100%, 52%, 1);
     --clr-white:hsla(310, 100%, 100%, 0.91);

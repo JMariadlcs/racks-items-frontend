@@ -16,7 +16,7 @@ module.exports = {
     },
     fontFamily:{
       whisper: ['Whisper', 'sans-serif'],
-      poppins: ['Poppins', 'sans-serif'],
+      monument: ['Monument Extended', 'sans-serif'],
     },
     extend: {}
     }
