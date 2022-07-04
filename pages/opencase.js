@@ -82,7 +82,7 @@ export default function Opencase({user, userConnected}) {
     const provider = new ethers.providers.Web3Provider(connection)
     const signer = provider.getSigner()
     const marketContract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
-    const totalSupply = await marketContract.totalSupply();
+    const totalSupply = await marketContract.getMaxTotalSupply();
     const supply = await marketContract.supplyOfItem(tokenId);
     const rarity = totalSupply.toNumber()/supply.toNumber()
     const prices = await marketContract.getItemsOnSale()

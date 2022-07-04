@@ -132,7 +132,7 @@ export default function Inventory() {
       try{
         setProcessing(true)
         setProcessingPhase("Retirando del mercado...")
-        const transaction = await marketContract.changeMarketItem(pickItem.tokenId, "0")
+        const transaction = await marketContract.changeMarketItem(pickItem.marketItemId, "0")
         await transaction.wait()
         setProcessingPhase("COMPLETADO")
         setShowCheckOut(false)
@@ -152,7 +152,7 @@ export default function Inventory() {
       try{
         setProcessing(true)
         setProcessingPhase("Modificando precio...")
-        const transaction = await marketContract.changeMarketItem(pickItem.tokenId, formInput.price.toString())
+        const transaction = await marketContract.changeItemPrice(pickItem.marketItemId, formInput.price.toString())
         await transaction.wait()
         setProcessingPhase("COMPLETADO")
         setShowCheckOut(false)
@@ -173,7 +173,7 @@ export default function Inventory() {
 
 
   async function fetchItemData(tokenId){
-    const totalSupply = await marketContract.totalSupply();
+    const totalSupply = await marketContract.getMaxTotalSupply();
     const supply = await marketContract.supplyOfItem(tokenId);
     const rarity = totalSupply.toNumber()/supply.toNumber()
     const prices = await marketContract.getItemsOnSale()
@@ -356,7 +356,7 @@ export default function Inventory() {
               <div onClick={()=>loadItems()}  className='bg-main w-36 flex justify-center cursor-pointer my-4 items-center h-8  '>Inventario</div>
               <div onClick={()=>loadMarketInventory()}  className='bg-main my-4 w-36 flex justify-center cursor-pointer items-center h-8 '>En venta</div>
             </div>
-            <div className='flex m-4 md:w-72 lg:w-96 '>
+            <div className='flex p-4 m-4 md:w-72 lg:w-96 '>
               <input onChange={(e)=> {setSearchWallet(e.target.value); loadExternalInventory(e.target.value)}}  type="text" className="w-full px-4 py-2 text-white bg-main outline-none" placeholder='Buscar wallet'  ></input>  
                 
             </div>

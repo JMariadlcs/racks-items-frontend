@@ -51,7 +51,7 @@ export default function Market({user, userConnected}) {
     setUserBalance(userBalance)
    
 
-    const totalSupply = await marketContract.totalSupply();
+    const totalSupply = await marketContract.getMaxTotalSupply();
     const supply = await marketContract.supplyOfItem(tokenId);
     const rarity = totalSupply.toNumber()/supply.toNumber()
 
