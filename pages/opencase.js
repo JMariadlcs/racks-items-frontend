@@ -55,7 +55,7 @@ export default function Opencase({user, userConnected}) {
     const account = await signer.getAddress()
     const contract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
     const data = await contract.getUserTicket(account.toString());
-    const casePrice = await contract.casePrice()
+    const casePrice = await contract.getPriceCase()
     const itemsData = await contract.caseLiquidity()
 
     const items = await Promise.all(itemsData

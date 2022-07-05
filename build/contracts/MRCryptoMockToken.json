@@ -14962,40 +14962,40 @@
     "absolutePath": "project:/contracts/MrCryptoMock.sol",
     "exportedSymbols": {
       "Address": [
-        7358
+        7353
       ],
       "Context": [
-        7380
+        7375
       ],
       "ERC165": [
-        7607
+        7602
       ],
       "ERC721": [
-        6533
+        6528
       ],
       "ERC721Enumerable": [
-        7005
+        7000
       ],
       "IERC165": [
-        7619
+        7614
       ],
       "IERC721": [
-        6649
+        6644
       ],
       "IERC721Enumerable": [
-        7036
+        7031
       ],
       "IERC721Metadata": [
-        7063
+        7058
       ],
       "IERC721Receiver": [
-        6667
+        6662
       ],
       "MRCryptoMockToken": [
         376
       ],
       "Strings": [
-        7583
+        7578
       ]
     },
     "id": 377,
@@ -15008,7 +15008,7 @@
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
         "scope": 377,
-        "sourceUnit": 7006,
+        "sourceUnit": 7001,
         "src": "0:94:2",
         "symbolAliases": [],
         "unitAlias": ""
@@ -15032,7 +15032,7 @@
               "id": 350,
               "name": "ERC721Enumerable",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 7005,
+              "referencedDeclaration": 7000,
               "src": "153:16:2"
             },
             "id": 351,
@@ -15047,14 +15047,14 @@
         "id": 376,
         "linearizedBaseContracts": [
           376,
-          7005,
-          7036,
-          6533,
-          7063,
-          6649,
-          7607,
-          7619,
-          7380
+          7000,
+          7031,
+          6528,
+          7058,
+          6644,
+          7602,
+          7614,
+          7375
         ],
         "name": "MRCryptoMockToken",
         "nameLocation": "132:17:2",
@@ -15139,7 +15139,7 @@
                   "id": 355,
                   "name": "ERC721",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 6533,
+                  "referencedDeclaration": 6528,
                   "src": "209:6:2"
                 },
                 "nodeType": "ModifierInvocation",
@@ -15248,7 +15248,7 @@
                       "name": "_mint",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 6257,
+                      "referencedDeclaration": 6252,
                       "src": "334:5:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_uint256_$returns$__$",
@@ -15343,40 +15343,40 @@
     "absolutePath": "project:/contracts/MrCryptoMock.sol",
     "exportedSymbols": {
       "Address": [
-        7358
+        7353
       ],
       "Context": [
-        7380
+        7375
       ],
       "ERC165": [
-        7607
+        7602
       ],
       "ERC721": [
-        6533
+        6528
       ],
       "ERC721Enumerable": [
-        7005
+        7000
       ],
       "IERC165": [
-        7619
+        7614
       ],
       "IERC721": [
-        6649
+        6644
       ],
       "IERC721Enumerable": [
-        7036
+        7031
       ],
       "IERC721Metadata": [
-        7063
+        7058
       ],
       "IERC721Receiver": [
-        6667
+        6662
       ],
       "MRCryptoMockToken": [
         376
       ],
       "Strings": [
-        7583
+        7578
       ]
     },
     "id": 377,
@@ -15389,7 +15389,7 @@
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
         "scope": 377,
-        "sourceUnit": 7006,
+        "sourceUnit": 7001,
         "src": "0:94:2",
         "symbolAliases": [],
         "unitAlias": ""
@@ -15413,7 +15413,7 @@
               "id": 350,
               "name": "ERC721Enumerable",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 7005,
+              "referencedDeclaration": 7000,
               "src": "153:16:2"
             },
             "id": 351,
@@ -15428,14 +15428,14 @@
         "id": 376,
         "linearizedBaseContracts": [
           376,
-          7005,
-          7036,
-          6533,
-          7063,
-          6649,
-          7607,
-          7619,
-          7380
+          7000,
+          7031,
+          6528,
+          7058,
+          6644,
+          7602,
+          7614,
+          7375
         ],
         "name": "MRCryptoMockToken",
         "nameLocation": "132:17:2",
@@ -15520,7 +15520,7 @@
                   "id": 355,
                   "name": "ERC721",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 6533,
+                  "referencedDeclaration": 6528,
                   "src": "209:6:2"
                 },
                 "nodeType": "ModifierInvocation",
@@ -15629,7 +15629,7 @@
                       "name": "_mint",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 6257,
+                      "referencedDeclaration": 6252,
                       "src": "334:5:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_uint256_$returns$__$",
@@ -15726,7 +15726,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.3",
-  "updatedAt": "2022-07-03T21:17:34.797Z",
+  "updatedAt": "2022-07-04T15:54:21.237Z",
   "devdoc": {
     "kind": "dev",
     "methods": {

@@ -11,4 +11,7 @@ contract MRCryptoMockToken is ERC721Enumerable{
         _mint(receiver, counter);
     }
 
+
+  
+
 }
