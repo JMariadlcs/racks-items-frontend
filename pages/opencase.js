@@ -5,23 +5,20 @@ import Web3Modal from 'web3modal'
 import Sidebar from "./components/Sidebar"
 import { itemList } from '../itemList'
 import { useRouter } from 'next/router'
-import NextNProgress from "nextjs-progressbar";
-import Script from 'next/script'
 import react from 'react'
-
 import RacksItemsv3 from '../build/contracts/RacksItemsv3.json'
 import RacksToken from '../build/contracts/RacksToken.json'
 import Link from 'next/link'
 
-import  { createRef , Component } from "react"
-import { ReactDOM } from "react";
-import { useRef} from "react"
 import {
   commerceAddress,
   tokenAddress
 } from '../config'
 
 export default function Opencase({user, userConnected}) {
+
+  const [userBalance, setUserBalance]= useState(0)
+  const [allowance , setAllowance] = useState(0)
   const [processingPhase, setProcessingPhase] = useState("")
   const [pickItem, setItem] = useState(0);
   const [items, setItems] = useState([])
@@ -55,19 +52,19 @@ export default function Opencase({user, userConnected}) {
     const account = await signer.getAddress()
     const contract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
     const data = await contract.getUserTicket(account.toString());
-    const casePrice = await contract.getPriceCase()
+    const casePrice = await contract.getCasePrice()
     const itemsData = await contract.caseLiquidity()
-
+    loadUserBalance()
     const items = await Promise.all(itemsData
       
       .map(async i => {
-       const item= i.toNumber()
+        const item= i.toNumber()
+        
+        return item
+      }))
+      setItems(items)
+      setCasePrice(casePrice.toNumber())
 
-      return item
-    }))
-    setItems(items)
-    
-    setCasePrice(casePrice.toNumber())
     const {0: durationLeft, 1: triesLeft, 3:ownerOrSpender, 4:ticketPrice} = data;
     if(data[2].toNumber()==1 || data[2].toNumber()==2){
       setVipState(true)
@@ -108,12 +105,23 @@ export default function Opencase({user, userConnected}) {
 
   }
 
-  
+  async function loadUserBalance(){
+    const web3Modal = new Web3Modal()
+    const connection = await web3Modal.connect()
+    const provider = new ethers.providers.Web3Provider(connection)
+    const signer = provider.getSigner()
+    const account = await signer.getAddress()
+    const tokenContract = new ethers.Contract(tokenAddress,RacksToken.abi, signer)
+    const response = await tokenContract.balanceOf(account)
+    const response2 = await tokenContract.allowance(account, commerceAddress)
+    const balance = response.toNumber()
+    const approved = response2.toNumber()
+    setUserBalance(balance)
+    setAllowance(approved)
+  }
+
  
   async function openCase() {
-    setProcessing(true)
-    setProcessingPhase("Aprovando...")
-    try{
     const web3Modal = new Web3Modal()
     const connection = await web3Modal.connect()
     const provider = new ethers.providers.Web3Provider(connection)
@@ -121,37 +129,42 @@ export default function Opencase({user, userConnected}) {
     const account = await signer.getAddress()
     const Tokencontract = new ethers.Contract(tokenAddress,RacksToken.abi, signer)
     const contract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
-    const approval = await Tokencontract.approve(commerceAddress , casePrice.toString())
-    await approval.wait()
-    setProcessingPhase("Conectando con el oráculo...")
-    const transaction = await contract.openCase()
-   
-    setProcessingPhase("Abriendo caja...")
-    await transaction.wait()
     
-    let gotItem
-    contract.on("CaseOpened", async (user, casePrice, item) =>  {
-      gotItem = item.toNumber();
-      setItem(gotItem)
-      console.log(gotItem)
-      setProcessing(false)
-      await renderItemData(gotItem)
-      setProcessingPhase("")
+    if(userBalance<casePrice && allowance<casePrice){
+      alert("Fondos insuficientes")
+    }else{
+      try{
+        setProcessing(true)
+        if(allowance<casePrice){
+        setProcessingPhase("Aprovando...")
+        const approval = await Tokencontract.approve(commerceAddress , casePrice.toString())
+        await approval.wait()
+        }
       
-     
+        setProcessingPhase("Conectando con el oráculo...")
+        const transaction = await contract.openCase()
+        setProcessingPhase("Abriendo caja...")
+        await transaction.wait()
+        let gotItem
 
-  }
+        contract.on("CaseOpened", async (user, casePrice, item) =>  {
+        gotItem = item.toNumber();
+        setItem(gotItem)
+        setProcessing(false)
+        await renderItemData(gotItem)
+        setProcessingPhase("")
+
+        });
   
+    }
+    catch{
+      setProcessing(false)
+      setProcessingPhase("")
+      }
+    }
+  }
+
   
-  );
-  }catch{
-    setProcessing(false)
-    setProcessingPhase("")
-
-  }
-
-
-  }
 
   if(loadingState!=='loaded')
     return(
@@ -173,43 +186,45 @@ export default function Opencase({user, userConnected}) {
   
     <div className='absolute w-full flex flex-col  bg-gradient-to-r from-soft '>
         <div className='flex'>
-        <Sidebar/>
-        <div class="mainscreen">
+          <Sidebar/>
+          <div class="mainscreen">
           
            {(vipState==true && processing==false)?(
-             <div className='flex flex-col justify-center items-center'>
-            <img width = {150} heigth={150} className="my-12" src="/case.png"/>
+              <div className='flex flex-col justify-center items-center'>
+              <img width = {150} heigth={150} className="my-12" src="/case.png"/>
            
-           <button  onClick={()=>openCase()} className='go '>{casePrice} RKS</button>
-           <div className=" p-4 rounded border border-secondary mt-8 grid grid-cols-2 mx-auto my-auto md:grid-cols-4 lg:grid-cols-6 gap-4 pt-4">
-          {
-            items
-              .map((item, i) => (
-            
-              <div className='border  border-main overflow-hidden rounded flex-col items-center bg-main/70' >
-                     
-                     <div className={`absolute rounded w-2 h-8 bg-secondary ${itemList[item].ticker}`}></div>
+              <button  onClick={()=>openCase()} className='go '>{casePrice} RKS</button>
+              <div className=" p-4 rounded border border-secondary mt-8 grid grid-cols-2 mx-auto my-auto md:grid-cols-4 lg:grid-cols-6 gap-4 pt-4">
+                {
+                  items
+                    .map((item, i) => (
                     
-                      <img src={itemList[item].imageSrc}  className="w-full   my-8 h-16"/>
-                      
-                      
-                     <img src="/racksLogoDos.png" height="20" width="50" className='mb-4'/> 
+                    <div className='border  border-main overflow-hidden rounded flex-col items-center bg-main/70' >
 
-                      
-              </div>
-     
-            ))
-          }
+                           <div className={`absolute rounded w-2 h-8 bg-secondary ${itemList[item].ticker}`}></div>
+
+                            <img src={itemList[item].imageSrc}  className="w-full   my-8 h-16"/>
+
+
+                           <img src="/racksLogoDos.png" height="20" width="50" className='mb-4'/> 
+                    
+
+                    </div>
+
+                  ))
+                }
          
-          </div>
+              </div>
            </div>
               
 
-            ):(vipState==false)?(
+          ):(vipState==false)?(
               <div className='flex flex-col justify-center items-center'>
-                <h1 className='font-bold mt-36 mb-24 text-3xl flex  text-secondary'> <svg className="mr-4" xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-lock-fill" viewBox="0 0 16 16">
-  <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
-</svg>No tienes permisos </h1>
+                <h1 className='font-bold mt-36 mb-24 text-3xl flex  text-secondary'> 
+                  <svg className="mr-4" xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-lock-fill" viewBox="0 0 16 16">
+                    <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+                  </svg> No tienes permisos 
+                </h1>
               <Link href="/tickets">
               <button className='go '>Mercado de tickets</button>
                 </Link>

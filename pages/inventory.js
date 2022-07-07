@@ -57,6 +57,7 @@ export default function Inventory() {
 
 
   async function exchangeItem(){
+
     try{
       setProcessing(true)
       setProcessingPhase("Haciendo pedido...")
@@ -69,20 +70,27 @@ export default function Inventory() {
       setShowItemData(false)
       loadItems()
       setProcessingPhase("")
+
     }catch{
+
       setProcessing(false)
       setProcessingPhase("")
+
     }
 
   }
 
 
   async function listItem(){
+
     if(formInput.price<=0){
       alert("Precio no valido")
     }
+
     else{
+
       try{
+
         setProcessing(true)
         setProcessingPhase("Listando item en el mercado...")
         const transaction = await marketContract.listItemOnMarket(pickItem.tokenId, formInput.price.toString())
@@ -94,19 +102,19 @@ export default function Inventory() {
         setShowItemData(false)
         setProcessingPhase("")
         loadItems()
+
     }catch{
+
         setProcessing(false)
         setShowCheckOut(false)
-      
         setShowItemData(false)
         loadItems()
         setProcessingPhase("")
-    
       }
     }
   }
 
-   function renderForm(item){
+  function renderForm(item){
     setItem(item);
     setShowForm(!showForm)
   }
@@ -179,6 +187,8 @@ export default function Inventory() {
     const prices = await marketContract.getItemsOnSale()
     let totalItems=0;
     let totalPrice=0;
+
+
     const items = await Promise.all(prices
       .filter(item=> item.tokenId.toNumber()== tokenId)
       .map(async i => {
@@ -186,10 +196,11 @@ export default function Inventory() {
         totalPrice += itemPrice
         totalItems +=1
     }))
-    const marketPrice = totalPrice/totalItems
 
+    const marketPrice = totalPrice/totalItems
     setFetchedData({rarity,supply: supply.toNumber() , marketPrice})
   }
+
 
   function renderItemData(item){
     setItem(item)
@@ -199,6 +210,7 @@ export default function Inventory() {
   }
 
   async function loadMarketInventory() {
+
     const web3Modal = new Web3Modal()
     const connection = await web3Modal.connect()
     const provider = new ethers.providers.Web3Provider(connection)
@@ -256,11 +268,13 @@ export default function Inventory() {
          }))
      _marketPrices[j] = totalPrice/totalItems
     }
+
     setMarketPrices(_marketPrices)
 
     const data = await contract.viewItems(account);
     let itemCounter=0;
     let items = []
+
     await Promise.all(data.map(async i=> {
       let counter = 0;
       let amount =  i.toNumber()
@@ -292,10 +306,12 @@ export default function Inventory() {
   
 
   async function loadExternalInventory(account){
+
     if(!account.length){
       loadItems()
 
     }else{
+
     const web3Modal = new Web3Modal()
     const connection = await web3Modal.connect()
     const provider = new ethers.providers.Web3Provider(connection)
@@ -305,11 +321,12 @@ export default function Inventory() {
 
     setLoadingState("not-loaded")
     try{
-    setInventoryValue(0)
-    const data = await contract.viewItems(account);
-    let itemCounter=0;
-    let items = []
-    await Promise.all(data.map(async i=> {
+
+      setInventoryValue(0)
+      const data = await contract.viewItems(account);
+      let itemCounter=0;
+      let items = []
+      await Promise.all(data.map(async i=> {
 
       let counter = 0;
       let amount =  i.toNumber()
@@ -334,13 +351,12 @@ export default function Inventory() {
     
     setInventoryValue(_inventoryValue)
     setItems(items)
+
   }catch{
     setItems([])
     console.log("Not found")
   }
   setLoadingState('loaded') 
-  
-
   }
 }
  
@@ -357,10 +373,9 @@ export default function Inventory() {
               <div onClick={()=>loadMarketInventory()}  className='bg-main my-4 w-36 flex justify-center cursor-pointer items-center h-8 '>En venta</div>
             </div>
             <div className='flex p-4 m-4 md:w-72 lg:w-96 '>
-              <input onChange={(e)=> {setSearchWallet(e.target.value); loadExternalInventory(e.target.value)}}  type="text" className="w-full px-4 py-2 text-white bg-main outline-none" placeholder='Buscar wallet'  ></input>  
-                
+              <input onChange={(e)=> {setSearchWallet(e.target.value); loadExternalInventory(e.target.value)}}  type="text" className="w-full px-4 py-2 text-white bg-main outline-none" placeholder='Buscar wallet'  ></input>       
             </div>
-          <div className=" w-full md:w-48 lg:w-48 flex flex-row justify-center p-4  items-center "><label className='bg-main' >{inventoryValue.toFixed(2)} RKS</label></div>
+           <div className=" w-full md:w-48 lg:w-48 flex flex-row justify-center p-4  items-center "><label className='bg-main' >{inventoryValue.toFixed(2)} RKS</label></div>
           
           </div>
           {(loadingState!=='loaded')&& (
@@ -536,65 +551,52 @@ export default function Inventory() {
     }
     {showForm && (
         <div className=' w-full flex flex-col justify-center items-center fixed'> 
-        <div className='flex '>
+          <div className='flex '>
+            <div className='flex flex-col h-screen w-full sticky top-0'>
+              <div class="mainscreen  ">
+                <div class="card">
+                  <div class="leftside">
+                    <img src={itemList[pickItem.tokenId].imageSrc} className="product m-8"/>
+                  </div>
+                  <div class="rightside">
+                    <form action="">
+                      <div className='flex justify-between'>
+                        <h1 className='font-semibold'>{itemList[pickItem.tokenId].name}</h1>
+                        <button onClick={()=>{setProcessing(false);setShowCheckOut(false);setShowForm(false) ;setShowItemData(false);}}>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+                          </svg>
+                        </button>
+                      </div>
+                      <h2 className='text-soft'>Modelo exclusivo de Racks Items</h2>
+                      <p>Precio (RKS)</p>
+                      <input onChange={(e)=>updateFormInput({price: e.target.value}) } type="number" class="inputbox" name="name" required />
+                        <div class="expcvv"> 
+                        </div>
+                        {
+                           processing ? (
+                            <div>
+                              <div  className="button flex justify-center bg-red-40 "> 
+                                <div class="vender">
+                                  <div></div>
+                                  <div></div>
+                                  <div></div>
+                                  </div></div>
+                              <div className='text-soft flex flex-col w-full items-center pt-4'> {processingPhase} </div>
+                            </div>
 
-<div className='flex flex-col h-screen w-full sticky top-0'>
-<div class="mainscreen  ">
-  
-
-<div class="card">
-
-<div class="leftside">
-  <img
-    src={itemList[pickItem.tokenId].imageSrc}
-    className="product m-8"
-  
-  />
-</div>
-<div class="rightside">
-  <form action="">
-     
-    <div className='flex justify-between'><h1 className='font-semibold'>{itemList[pickItem.tokenId].name}</h1><button onClick={()=>{setProcessing(false);setShowCheckOut(false);setShowForm(false) ;setShowItemData(false);}}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
-<path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
-</svg></button></div>
-    <h2 className='text-soft'>Modelo exclusivo de Racks Items</h2>
-    <p>Precio (RKS)</p>
-    <input onChange={(e)=>updateFormInput({price: e.target.value}) } type="number" class="inputbox" name="name" required />
-    
-
-  
-<div class="expcvv">
-
-
-  
-</div>
-   {
-         processing ? (
-          <div>
-           <div  className="button flex justify-center bg-red-40 "> <div class="vender"><div></div><div></div><div></div></div></div>
-           <div className='text-soft flex flex-col w-full items-center pt-4'> {processingPhase} </div>
+                           ):(
+                           <div onClick={()=>listItem(pickItem)} className="button cursor-pointer flex justify-center bg-red hover:bg-red/40">Vender</div>)
+                        }
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-
-         ):(
-         <div onClick={()=>listItem(pickItem)} className="button cursor-pointer flex justify-center bg-red hover:bg-red/40">Vender</div>)
-       }
-
-   
-  </form>
-</div>
-</div>
-</div>
-
-
-</div>
-
-
-
-
-    
-</div>
-  </div>
+        </div>
       )}
+      
       {
         showCheckout && (
           <div className=' w-full flex flex-col justify-center items-center fixed '> 

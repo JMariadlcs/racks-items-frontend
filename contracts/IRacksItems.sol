@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-
+import "./ITickets.sol";
 pragma solidity ^0.8.0;
 
 interface IRacksItems { 
@@ -15,19 +15,6 @@ interface IRacksItems {
     bool isOnSale;
     }
 
-    /**
-    * @notice Struct for Tickets on the Marketplace
-    */
-    struct caseTicket {
-    uint256 ticketId;
-    uint256 numTries;
-    uint256 duration;
-    uint256 price;
-    address owner;
-    uint256 timeWhenSold;
-    bool isAvaliable;
-    }
-
     /// @notice Events
     event CaseOpened(address user, uint256 casePrice, uint256 item);
     event casePriceChanged(uint256 newPrice);
@@ -40,7 +27,7 @@ interface IRacksItems {
     event unListTicketOnSale(address owner);
     event ticketConditionsChanged(address owner, uint256 newTries, uint256 newHours, uint256 newPrice);
     event ticketBought(uint256 ticketId, address oldOwner, address newOwner, uint256 price);
-    event ticketClaimedBack(address borrower, address realOwner);
+    event ticketClaimedBack( address realOwner);
 
     function openCase() external;
 
@@ -61,8 +48,6 @@ interface IRacksItems {
 
     function buyItem(uint256 marketItemId) external;
 
-    function getMarketItem(uint marketItemId) external view returns(itemOnSale memory);
-
     function getItemsOnSale() external view returns(itemOnSale[] memory);
 
     function listTicket(uint256 numTries, uint256 _hours, uint256 price) external;
@@ -75,9 +60,9 @@ interface IRacksItems {
 
     function claimTicketBack() external;
 
-    function getMarketTicket(uint256 ticketId) external view returns(caseTicket memory);
+    function getMarketTicket(uint256 ticketId) external view returns( uint256 numTries, uint256 duration, uint256 price, address owner, uint256 timeWhenSold, bool isAvaliable);
 
-    function getTicketsOnSale() external view returns(caseTicket[] memory);
+    function getTicketsOnSale() external view returns(ITickets.caseTicket[] memory);
 
     function getTicketDurationLeft(uint256 ticketId) external view returns (address, uint256, bool);
 
@@ -92,4 +77,8 @@ interface IRacksItems {
     function withdrawFunds(address wallet, uint256 amount) external;
 
     function withdrawAllFunds(address wallet) external; 
+    
+    
+
+
 }
