@@ -3,8 +3,9 @@
 # dependencies
 /node_modules
 /test
+/migrations
 /.pnp
-.truffle config
+.truffle config.js
 .pnp.js
 
 # testing
