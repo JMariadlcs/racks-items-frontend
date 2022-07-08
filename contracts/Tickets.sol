@@ -35,6 +35,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
     *
     */
     function listTicket(uint256 numTries, uint256 _hours, uint256 price, address user) external  override{
+        
         require(msg.sender==address(RacksItems));
         require(!s_isSellingTicket[user], "User is already currently selling a Ticket");
         if(s_hadTicket[user]) {
@@ -104,17 +105,17 @@ import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
     * - Emit event
     */
     function buyTicket(uint256 ticketId, address user) external override{
+
         require(msg.sender==address(RacksItems));
         require(RacksItems.isVip(user)==false, "A VIP user can not buy a ticket");
         require(_tickets[ticketId].owner != user, "You can not buy a ticket to your self");
-        require(_tickets[ticketId].isAvaliable == true, "Ticket is not currently avaliable");
-        address oldOwner = _tickets[ticketId].owner;
+        require(_tickets[ticketId].isAvaliable == true, "Ticket is not currently avaliable");    
         _tickets[ticketId].timeWhenSold = block.timestamp;
         s_hasTicket[_tickets[ticketId].owner] = false;
         s_isSellingTicket[_tickets[ticketId].owner] = false;
         s_ticketIsLended[_tickets[ticketId].owner] = true;
         s_hasTicket[user] = true;
-        _tickets[ticketId].owner = user;
+        _tickets[ticketId].owner = msg.sender;
         _tickets[ticketId].isAvaliable = false;
         s_lastTicket[user] = ticketId;
        
@@ -128,23 +129,20 @@ import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
     * - Emit event
     */
     function claimTicketBack(address user) external override{
+
         require(msg.sender==address(RacksItems));
         uint ticketId = s_lastTicket[user];
         require(s_ticketIsLended[user], "User did not sell any Ticket");
-        require((_tickets[ticketId].numTries == 0) || (block.timestamp - _tickets[ticketId].timeWhenSold) >= _tickets[ticketId].duration , "Duration of the Ticket or numTries is still avaliable");
-        address oldOwner = _tickets[ticketId].owner;
+        require((_tickets[ticketId].numTries == 0) || (((block.timestamp - _tickets[ticketId].timeWhenSold)/60) == (_tickets[ticketId].duration * 60)), "Duration of the Ticket or numTries is still avaliable");
         s_hasTicket[_tickets[ticketId].owner] = false;
         s_hasTicket[user] = true;
         s_ticketIsLended[user] = false;
-        _tickets[ticketId].owner = user;
-        _tickets[ticketId].isAvaliable = true;
-        s_hasTicket[_tickets[ticketId].owner] = true;
         _unlockMrCrypto(user);
   
     }
      function getUserTicket(address user) external view override returns(uint256 durationLeft, uint256 triesLeft, uint ownerOrSpender, uint256 ticketPrice) {
         require(msg.sender==address(RacksItems));
-        if(_ticketOwnership(user)==1 || _ticketOwnership(user)==0){
+        if(_ticketOwnership(user)==1 || _ticketOwnership(user)==0 || _ticketOwnership(user)==4){
           return(0,0,_ticketOwnership(user), 0);
         }else{
         uint256 ticketId = s_lastTicket[user];
@@ -170,11 +168,22 @@ import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
     //////////////////////
     //  User Functions // 
     /////////////////////
+
+    /**
+    *Returns the users` ticket ownership:
+        -1 if is VIP and owns a ticket
+        -2 if is NOT VIP and owns a ticket
+        -3 if is VIP and ticket is lended
+        -4 if is VIP and currently selling a ticket
+        -0 else
+    
+    */
+
     function _ticketOwnership(address user) internal view returns(uint ownerOrSpender){
       uint ticketOwnership;
-      if (RacksItems.isVip(user) && !s_hadTicket[user]){
+      if (RacksItems.isVip(user) && !s_isSellingTicket[user] &&  !s_ticketIsLended[user]){
         ticketOwnership=1;
-        } else if(!RacksItems.isVip(user)&& s_hasTicket[user] ){
+        } else if(!RacksItems.isVip(user) && s_hasTicket[user] ){
           ticketOwnership=2;
         }else if(RacksItems.isVip(user) && !s_isSellingTicket[user] && !s_hasTicket[user] && s_hadTicket[user] && s_ticketIsLended[user]){
           ticketOwnership=3;
@@ -192,19 +201,17 @@ import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
     *        - If so: decrease numTries, update Avaliability and mappings
     */
     function decreaseTicketTries(address user) external override {
+
     require(msg.sender == address(RacksItems));
-    for (uint256 i = 0; i < _tickets.length; i++) {
-        if (_tickets[i].owner == user && _tickets[i].isAvaliable ) {
-            if(_tickets[i].numTries != 1) { // Case it was not the last trie avaliable
-                _tickets[i].numTries--;
+    uint ticketId = s_lastTicket[user];
+            if(_tickets[ticketId].numTries != 1) { // Case it was not the last trie avaliable
+                _tickets[ticketId].numTries--;
             }else { // it was his last trie avaliable
-                _tickets[i].numTries--;
-                _tickets[i].isAvaliable = false;
+                _tickets[ticketId].numTries--;
                 s_hasTicket[user] = false;
             }
-        }       
-    } 
-    }
+    
+     }
 
  
 
@@ -234,21 +241,25 @@ import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
     }
 
      function getTicketDurationLeft(uint256 ticketId) public view override returns (address, uint256, bool) {
-        require(_tickets[ticketId].timeWhenSold > 0, "Ticket is not sold yet.");
-        uint256 timeLeft;
-        if ((_tickets[ticketId].numTries == 0)) { 
-            return (_tickets[ticketId].owner, timeLeft, false);
-        } else {
-            if((block.timestamp - _tickets[ticketId].timeWhenSold) >= _tickets[ticketId].duration ) {
-            timeLeft = 0;
-            return (_tickets[ticketId].owner, timeLeft, true);
-            }else {
-            uint hour = 1 hours;
-            timeLeft = (_tickets[ticketId].timeWhenSold + _tickets[ticketId].duration ) - block.timestamp ;
-            uint hoursLeft = timeLeft * 100/ 3600;
-            return (_tickets[ticketId].owner, hoursLeft, true);
-            } 
-        }
+            require(_tickets[ticketId].timeWhenSold>0, "Ticket is not sold yet");
+            uint256 timeLeft;
+            if ((_tickets[ticketId].numTries == 0)) {
+              if((((block.timestamp - _tickets[ticketId].timeWhenSold)/60) == (_tickets[ticketId].duration * 60))) {
+                timeLeft = 0;
+                return (_tickets[ticketId].owner, timeLeft, false);
+              }else {
+                timeLeft = (_tickets[ticketId].duration * 60) - ((block.timestamp - _tickets[ticketId].timeWhenSold)/60);
+                return (_tickets[ticketId].owner, timeLeft, false);
+              } 
+            } else {
+              if((((block.timestamp - _tickets[ticketId].timeWhenSold)/60) == (_tickets[ticketId].duration * 60))) {
+                timeLeft = 0;
+                return (_tickets[ticketId].owner, timeLeft, true);
+              }else {
+                timeLeft = (_tickets[ticketId].duration * 60) - ((block.timestamp - _tickets[ticketId].timeWhenSold)/60);
+                return (_tickets[ticketId].owner, timeLeft, true);
+              } 
+            }
     }
 
      function _mrCryproWallet(address user) internal  view returns (uint256[] memory){

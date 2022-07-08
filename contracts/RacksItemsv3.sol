@@ -110,8 +110,8 @@ contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{
     * @dev Only callable by the Owner
     */
     function setCasePrice(uint256 price) public onlyOwnerOrAdmin {
-    casePrice = price;
-    emit casePriceChanged(price);
+        casePrice = price;
+        emit casePriceChanged(price);
     }
 
    
@@ -410,8 +410,8 @@ contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{
     function buyTicket(uint256 ticketId) public override contractIsActive {
         require(!isVip(msg.sender), "A VIP user can not buy a ticket");
         (,,uint price,address oldOwner,,) = TICKETS.getMarketTicket(ticketId);
-        TICKETS.buyTicket(ticketId, msg.sender);
         racksToken.transferFrom(msg.sender, oldOwner, price);  
+        TICKETS.buyTicket(ticketId, msg.sender);
         emit ticketBought(ticketId, oldOwner, msg.sender, price);
     }
 

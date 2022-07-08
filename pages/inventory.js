@@ -134,29 +134,31 @@ export default function Inventory() {
     setShowCheckOut(!showCheckout)
   }
 
+
+  async function removeItem(item){
+    try{
+      setProcessing(true)
+      setProcessingPhase("Retirando del mercado...")
+      const transaction = await marketContract.unListItem(pickItem.marketItemId)
+      await transaction.wait()
+      setProcessingPhase("COMPLETADO")
+      setShowCheckOut(false)
+      setProcessing(false)
+      setShowForm(false)
+      setShowDelete(false)
+      setShowItemData(false)
+      loadItems()
+      setProcessingPhase("")
+
+    }catch{
+     
+      setProcessing(false)
+      setProcessingPhase("")
+    }
+  }
+
   async function modifyItem(item){
-    console.log(formInput.price)
-    if(formInput.price==0){
-      try{
-        setProcessing(true)
-        setProcessingPhase("Retirando del mercado...")
-        const transaction = await marketContract.changeMarketItem(pickItem.marketItemId, "0")
-        await transaction.wait()
-        setProcessingPhase("COMPLETADO")
-        setShowCheckOut(false)
-        setProcessing(false)
-        setShowForm(false)
-        setShowItemData(false)
-        loadItems()
-        setProcessingPhase("")
 
-      }catch{
-       
-        setProcessing(false)
-        setProcessingPhase("")
-
-      }
-    }else{
       try{
         setProcessing(true)
         setProcessingPhase("Modificando precio...")
@@ -176,7 +178,7 @@ export default function Inventory() {
         setProcessingPhase("")
 
       }
-    }
+    
   }
 
 
@@ -240,36 +242,49 @@ export default function Inventory() {
   }
   
   async function loadItems() {
+
     setLoadingState('not-loaded')
     setMarketPrices([])
     setInventoryValue(0)
     setShowMarketInventory(false)
+    
+    // Saving the contract and user address in order to use them in other functions
+    
     const web3Modal = new Web3Modal()
     const connection = await web3Modal.connect()
     const provider = new ethers.providers.Web3Provider(connection)
     const signer = provider.getSigner()
     const account = await signer.getAddress()
-    let _inventoryValue = 0
-    setUserAddress(account)
     const contract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
+    setUserAddress(account)
     setMarketContract(contract)
+
+    let _inventoryValue = 0
     const prices = await contract.getItemsOnSale()
     const _marketPrices = []
+
+    // fetching invenrory and the market value of each
+
 
     for(let j=0; j<itemList.length; j++){
       let totalItems=0;
       let totalPrice=0;
-      const itemPrices = await Promise.all(prices
+      const itemPrices = await Promise.all(
+        prices
         .filter(item=> item.tokenId.toNumber()== j)
         .map(async i => {
+
           const itemPrice = i.price.toNumber()
           totalPrice += itemPrice
           totalItems +=1
+
          }))
      _marketPrices[j] = totalPrice/totalItems
     }
 
     setMarketPrices(_marketPrices)
+
+    // Calculating total inventory value
 
     const data = await contract.viewItems(account);
     let itemCounter=0;
@@ -298,8 +313,8 @@ export default function Inventory() {
         
       }))
       
-    setInventoryValue(_inventoryValue)
     setItems(items)
+    setInventoryValue(_inventoryValue)
     setLoadingState('loaded') 
   
   }
@@ -536,7 +551,7 @@ export default function Inventory() {
                                   <div className='text-soft flex flex-col w-full items-center pt-4'> {processingPhase} </div>
                                 </div>
                               ):(
-                              <div onClick={()=>{ updateFormInput(0);modifyItem(pickItem)}} className="button cursor-pointer flex justify-center bg-red hover:bg-red/40">Retirar</div>)
+                              <div onClick={()=>{removeItem(pickItem)}} className="button cursor-pointer flex justify-center bg-red hover:bg-red/40">Retirar</div>)
                         }
 
                     </form>

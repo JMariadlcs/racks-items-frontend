@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import Web3Modal from 'web3modal'
 import Sidebar from "./components/Sidebar"
 import Link from "next/Link"
-import {useRouter}from 'next/router'
+
 import {
   commerceAddress,
   tokenAddress
@@ -15,7 +15,10 @@ import RacksToken from '../build/contracts/RacksToken.json'
 
 
 export default function Market({user, userConnected}) {
-  const router = useRouter()
+
+  const [marketContract,setMarketContract]= useState()
+  const [tokenContract, setTokenContract] = useState()
+  const [userAddress, setUserAddress] = useState("")
   const [userBalance, setUserBalance]= useState(0)
   const [allowance, setAllowance] = useState(0)
   const [processing, setProcessing] = useState(false);
@@ -25,79 +28,101 @@ export default function Market({user, userConnected}) {
   const [pickItem, setItem] = useState();
   const [items, setItems] = useState([])
   const [loadingState, setLoadingState] = useState('not-loaded')
+
   useEffect(() => {
     loadItems()
     if (window.ethereum) {
       window.ethereum.on("accountsChanged", (accounts) => {
         loadItems()
-    })}
-  }, [])
+      })}
+    }, [])
+    
 
-  async function fetchItemData(tokenId){
+    async function loadItems() {
+      
+      const web3Modal = new Web3Modal()
+      const connection = await web3Modal.connect()
+      const provider = new ethers.providers.Web3Provider(connection)
+      const signer = provider.getSigner()
+      const account = await signer.getAddress()
+      const market = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
+      const token = new ethers.Contract(tokenAddress, RacksToken.abi, signer )
+      setUserAddress(account)
+      setMarketContract(market)
+      setTokenContract(token)
 
-    loadUserBalance()
-    const web3Modal = new Web3Modal()
-    const connection = await web3Modal.connect()
-    const provider = new ethers.providers.Web3Provider(connection)
-    const signer = provider.getSigner()
-    const account = await signer.getAddress()
-    const marketContract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
-    const totalSupply = await marketContract.getMaxTotalSupply();
-    const supply = await marketContract.supplyOfItem(tokenId);
-    const rarity = totalSupply.toNumber()/supply.toNumber()
-
-    setFetchedData({rarity,supply: supply.toNumber()})
-
-
-  }
-
-
-  function renderItemData(item){
-    setItem(item)
-    fetchItemData(item.tokenId);
-    setShowItemData(!showItemData)
-
-  }
-
-
-  async function loadUserBalance(){
-    const web3Modal = new Web3Modal()
-    const connection = await web3Modal.connect()
-    const provider = new ethers.providers.Web3Provider(connection)
-    const signer = provider.getSigner()
-    const account = await signer.getAddress()
-    const tokenContract = new ethers.Contract(tokenAddress,RacksToken.abi, signer)
-    const response = await tokenContract.balanceOf(account)
-    const response2 = await tokenContract.allowance(account, commerceAddress)
-    const userBalance = response.toNumber()
-    const approved = response2.toNumber()
-
-    setUserBalance(userBalance)
-    setAllowance(approved)
-
-
-  }
+      const response2 = await token.allowance(account, commerceAddress)
+      const response = await token.balanceOf(account)
+      const userBalance = response.toNumber()
+      const approved = response2.toNumber()
+      setUserBalance(userBalance)
+      setAllowance(approved)
+     
+      const data = await market.getItemsOnSale()
+      const items = await Promise.all(data
+        .filter(item=> item.itemOwner != account)
+        .map(async i => {
+        
+        let price=i.price.toString()
+        let owner = i.itemOwner
+    
+        let item = {
+          marketItemId: i.marketItemId.toNumber(),
+          price,
+          tokenId: i.tokenId.toNumber(),
+          owner
+        }
+        
+        return item
+      }))
+      setItems(items)
+      
+      
+      setLoadingState('loaded') 
+    }
+    
+    async function loadUserBalance(){
   
+      const response = await tokenContract.balanceOf(userAddress)
+      const response2 = await tokenContract.allowance(userAddress, commerceAddress)
+      const userBalance = response.toNumber()
+      const approved = response2.toNumber()
+      setUserBalance(userBalance)
+      setAllowance(approved)
+  
+  
+    }
+
+    async function fetchItemData(tokenId){
+
+      loadUserBalance()
+
+      const totalSupply = await marketContract.getMaxTotalSupply();
+      const supply = await marketContract.supplyOfItem(tokenId);
+      const rarity = totalSupply.toNumber()/supply.toNumber()
+
+      setFetchedData({rarity,supply: supply.toNumber()})
+
+    }
+
+
+    
+    
+    
   async function buyItem(item) {
     if(userBalance<item.price && allowance <item.price){
       alert("Balance insuficiente")
     }else{
       setProcessing(true)
-      const web3Modal = new Web3Modal()
-      const connection = await web3Modal.connect()
-      const provider = new ethers.providers.Web3Provider(connection)
-      const signer = provider.getSigner()
-      const Tokencontract = new ethers.Contract(tokenAddress,RacksToken.abi, signer)
-      const marketContract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
 
       try{
 
         if(allowance<item.price){
           setProcessingPhase("Aprovando token...")
-          const approval = await Tokencontract.approve(commerceAddress, item.price.toString())
+          const approval = await tokenContract.approve(commerceAddress, item.price.toString())
           await approval.wait()
         }
-        
+
         setProcessingPhase("Realizando pago...")
         const transaction = await marketContract.buyItem(item.marketItemId ,{gasLimit : 3000000})
         await transaction.wait()
@@ -114,34 +139,12 @@ export default function Market({user, userConnected}) {
       }   
   }
 
-  async function loadItems() {
-    loadUserBalance()
-    const web3Modal = new Web3Modal()
-    const connection = await web3Modal.connect()
-    const provider = new ethers.providers.Web3Provider(connection)
-    const signer = provider.getSigner()
-    const account = await signer.getAddress()
-    const contract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
-    const data = await contract.getItemsOnSale()
-    const items = await Promise.all(data
-      .filter(item=> item.itemOwner != account)
-      .map(async i => {
-      
-      let price=i.price.toString()
-      let owner = i.itemOwner
+    function renderItemData(item){
+      setItem(item)
+      fetchItemData(item.tokenId);
+      setShowItemData(!showItemData)
 
-      let item = {
-        marketItemId: i.marketItemId.toNumber(),
-        price,
-        tokenId: i.tokenId.toNumber(),
-        owner
-      }
-      
-      return item
-    }))
-    setItems(items)
-    setLoadingState('loaded') 
-  }
+    }
 
 
   if(loadingState!=='loaded'){

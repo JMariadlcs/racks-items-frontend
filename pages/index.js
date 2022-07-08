@@ -28,7 +28,7 @@ export default function Home({user, userConnected}) {
             }
          
          
-          <Link href = "/docs">
+          <Link href = "https://github.com/devScrooge/racks-items-backend/blob/main/README.md" target={"_blank"}>
           <button className='docs'>
             Documentación
           </button>

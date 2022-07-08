@@ -16,7 +16,9 @@ import {
 } from '../config'
 
 export default function Opencase({user, userConnected}) {
-
+  const [marketContract, setMarketContract] = useState()
+  const [tokenContract, setTokenContract] = useState()
+  const [userAddress, setUserAddress] = useState("")
   const [userBalance, setUserBalance]= useState(0)
   const [allowance , setAllowance] = useState(0)
   const [processingPhase, setProcessingPhase] = useState("")
@@ -30,6 +32,13 @@ export default function Opencase({user, userConnected}) {
   const [showItemData, setShowItemData] = useState(false);
 
   useEffect(() => {
+    if(marketContract){
+      marketContract.on("casePriceChanged", async (price) =>{
+        let _price = price.toNumber()
+        setCasePrice(_price)
+      })
+    }
+    
     loadVipState()
     if (window.ethereum) {
       window.ethereum.on("accountsChanged", (accounts) => {
@@ -50,11 +59,23 @@ export default function Opencase({user, userConnected}) {
     const provider = new ethers.providers.Web3Provider(connection)
     const signer = provider.getSigner()
     const account = await signer.getAddress()
-    const contract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
-    const data = await contract.getUserTicket(account.toString());
-    const casePrice = await contract.getCasePrice()
-    const itemsData = await contract.caseLiquidity()
-    loadUserBalance()
+    const market = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
+    const token = new ethers.Contract(tokenAddress , RacksToken.abi, signer)
+    
+    setMarketContract(market)
+    setTokenContract(token)
+    setUserAddress(account)
+
+    const response = await token.balanceOf(account)
+    const response2 = await token.allowance(account, commerceAddress)
+    const balance = response.toNumber()
+    const approved = response2.toNumber()
+    setUserBalance(balance)
+    setAllowance(approved)
+
+    const data = await market.getUserTicket(account.toString());
+    const casePrice = await market.getCasePrice()
+    const itemsData = await market.caseLiquidity()
     const items = await Promise.all(itemsData
       
       .map(async i => {
@@ -74,11 +95,7 @@ export default function Opencase({user, userConnected}) {
   }
 
   async function fetchItemData(tokenId){
-    const web3Modal = new Web3Modal()
-    const connection = await web3Modal.connect()
-    const provider = new ethers.providers.Web3Provider(connection)
-    const signer = provider.getSigner()
-    const marketContract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
+   
     const totalSupply = await marketContract.getMaxTotalSupply();
     const supply = await marketContract.supplyOfItem(tokenId);
     const rarity = totalSupply.toNumber()/supply.toNumber()
@@ -105,54 +122,36 @@ export default function Opencase({user, userConnected}) {
 
   }
 
-  async function loadUserBalance(){
-    const web3Modal = new Web3Modal()
-    const connection = await web3Modal.connect()
-    const provider = new ethers.providers.Web3Provider(connection)
-    const signer = provider.getSigner()
-    const account = await signer.getAddress()
-    const tokenContract = new ethers.Contract(tokenAddress,RacksToken.abi, signer)
-    const response = await tokenContract.balanceOf(account)
-    const response2 = await tokenContract.allowance(account, commerceAddress)
-    const balance = response.toNumber()
-    const approved = response2.toNumber()
-    setUserBalance(balance)
-    setAllowance(approved)
-  }
+
 
  
   async function openCase() {
-    const web3Modal = new Web3Modal()
-    const connection = await web3Modal.connect()
-    const provider = new ethers.providers.Web3Provider(connection)
-    const signer = provider.getSigner()
-    const account = await signer.getAddress()
-    const Tokencontract = new ethers.Contract(tokenAddress,RacksToken.abi, signer)
-    const contract = new ethers.Contract(commerceAddress,RacksItemsv3.abi, signer)
+ 
     
     if(userBalance<casePrice && allowance<casePrice){
       alert("Fondos insuficientes")
     }else{
       try{
         setProcessing(true)
+
         if(allowance<casePrice){
         setProcessingPhase("Aprovando...")
-        const approval = await Tokencontract.approve(commerceAddress , casePrice.toString())
+        const approval = await tokenContract.approve(commerceAddress , casePrice.toString())
         await approval.wait()
         }
       
         setProcessingPhase("Conectando con el oráculo...")
-        const transaction = await contract.openCase()
+        const transaction = await marketContract.openCase()
         setProcessingPhase("Abriendo caja...")
         await transaction.wait()
         let gotItem
 
-        contract.on("CaseOpened", async (user, casePrice, item) =>  {
-        gotItem = item.toNumber();
-        setItem(gotItem)
-        setProcessing(false)
-        await renderItemData(gotItem)
-        setProcessingPhase("")
+        marketContract.on("CaseOpened", async (user, casePrice, item) =>  {
+          gotItem = item.toNumber();
+          setItem(gotItem)
+          setProcessing(false)
+          await renderItemData(gotItem)
+          setProcessingPhase("")
 
         });
   
