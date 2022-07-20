@@ -19,7 +19,7 @@ contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{
     Active,
     Inactive
     }
-    //Interfaces
+    /// @notice Interfaces
     ICaseOpener CASE_OPENER;
     ITickets TICKETS;
 
@@ -97,7 +97,7 @@ contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{
     * @notice Need to override supportsInterface function because Contract is ERC1155 and AccessControl
     */
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, ERC1155Receiver, AccessControl) returns (bool) {
-    return super.supportsInterface(interfaceId);
+        return super.supportsInterface(interfaceId);
     }
 
 
@@ -126,22 +126,29 @@ contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{
     * - Apply modular function for the randomNumber to be between 0 and totalSupply of items
     * - Should choose an item
     */
-    function openCase() public override supplyAvaliable contractIsActive  {  
+    function openCase() public override supplyAvaliable contractIsActive returns(bool success){  
         if (MR_CRYPTO.balanceOf(msg.sender) < 1) {
             (,,uint ownerOrSpender,)= TICKETS.getUserTicket(msg.sender);
             require(ownerOrSpender==2, "User does not own a Ticket for openning the case.");
         }
 
         racksToken.transferFrom(msg.sender , address(this), casePrice);
-        uint item = CASE_OPENER.openCase();
-        _safeTransferFrom(address(this), msg.sender, item , 1,"");
+        CASE_OPENER._generate(msg.sender);
 
         if (!isVip(msg.sender)){ // Case opener is someone that bought a ticket
-            TICKETS.decreaseTicketTries(msg.sender);
+            TICKETS._decreaseT(msg.sender);
         }
-        emit CaseOpened(msg.sender, casePrice, item);
+       
+        return true;
     }
 
+
+    function fullfillCaseRequest(address user, uint item) external override{
+        require(msg.sender == address (CASE_OPENER));
+        _safeTransferFrom(address(this), user ,  item , 1,"");
+        emit CaseOpened(msg.sender, casePrice, item);
+
+    }
     /**
     * @notice Returns all the items the case can drop
     */
@@ -246,20 +253,20 @@ contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{
     * - Emit event 
     */
     function listItemOnMarket(uint256 marketItemId, uint256 price) public override {
-    require(balanceOf(msg.sender, marketItemId) > 0, "Item not found.");
-    require(price > 0, "Price must be greater than 0");
-    s_marketInventory[msg.sender][marketItemId] += 1;
-    _marketItems.push(
-        itemOnSale(
-        marketItemId,
-        _marketCount,
-        price,
-        msg.sender,
-        true
-        )
-    );
-    _marketCount++;
-    emit sellingItem(msg.sender, marketItemId, price);
+        require(balanceOf(msg.sender, marketItemId) > 0, "Item not found.");
+        require(price > 0, "Price must be greater than 0");
+        s_marketInventory[msg.sender][marketItemId] += 1;
+        _marketItems.push(
+            itemOnSale(
+            marketItemId,
+            _marketCount,
+            price,
+            msg.sender,
+            true
+            )
+        );
+        _marketCount++;
+        emit sellingItem(msg.sender, marketItemId, price);
     }
 
     /**
@@ -372,9 +379,9 @@ contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{
     * - Emit event
     *
     */
-    function listTicket(uint256 numTries, uint256 _hours, uint256 price) public override onlyVIP contractIsActive  {
-        TICKETS.listTicket(numTries, _hours , price, msg.sender);
-        emit newTicketOnSale(msg.sender, numTries, _hours, price);
+    function listTicketFrom(address from, uint256 numTries, uint256 _hours, uint256 price) public override onlyVIP contractIsActive  {
+        TICKETS._listT(from,numTries, _hours , price, msg.sender);
+        emit newTicketOnSale(from, numTries, _hours, price);
     }
 
     /**
@@ -383,9 +390,9 @@ contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{
     * - Should check that user has a listed ticket
     * - Emit event
     */
-    function unListTicket() public override onlyVIP contractIsActive  {
-        TICKETS.unListTicket(msg.sender);
-        emit unListTicketOnSale(msg.sender);
+    function unListTicketFrom(address from) public override onlyVIP contractIsActive  {
+        TICKETS._unlistT(from, msg.sender);
+        emit unListTicketOnSale(from);
     }
 
     /**
@@ -394,9 +401,9 @@ contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{
     * - Should check that user has a listed ticket
     * - Emit event
     */
-    function changeTicketConditions(uint256 newTries, uint256 newHours, uint256 newPrice) public override onlyVIP contractIsActive {
-        TICKETS.changeTicketConditions( newTries,  newHours,  newPrice, msg.sender);
-        emit ticketConditionsChanged(msg.sender, newTries, newHours, newPrice);
+    function changeTicketConditionsFrom(address from, uint256 newTries, uint256 newHours, uint256 newPrice) public override onlyVIP contractIsActive {
+        TICKETS._changeT(from, newTries,  newHours,  newPrice, msg.sender);
+        emit ticketConditionsChanged(from, newTries, newHours, newPrice);
     }
 
     /**
@@ -411,7 +418,7 @@ contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{
         require(!isVip(msg.sender), "A VIP user can not buy a ticket");
         (,,uint price,address oldOwner,,) = TICKETS.getMarketTicket(ticketId);
         racksToken.transferFrom(msg.sender, oldOwner, price);  
-        TICKETS.buyTicket(ticketId, msg.sender);
+        TICKETS._buyT(ticketId, msg.sender);
         emit ticketBought(ticketId, oldOwner, msg.sender, price);
     }
 
@@ -422,9 +429,9 @@ contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{
     * - Update mappings
     * - Emit event
     */
-    function claimTicketBack() public override onlyVIP {
-        TICKETS.claimTicketBack(msg.sender);
-        emit ticketClaimedBack( msg.sender);
+    function claimTicketBackFrom(address from) public override onlyVIP {
+        TICKETS._claimT(from, msg.sender);
+        emit ticketClaimedBack( from);
     }
 
    
@@ -435,6 +442,21 @@ contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{
     function getMarketTicket(uint256 ticketId) public view override returns( uint256 numTries, uint256 duration, uint256 price, address owner, uint256 timeWhenSold, bool isAvaliable) {
         TICKETS.getMarketTicket(ticketId);
     }
+
+    
+    function approveForTickets( address spender, bool permission) public override {
+      require(MR_CRYPTO.balanceOf(msg.sender)>0,"You are not VIP user");
+      TICKETS._approveT(msg.sender, spender, permission);
+    }
+
+    function ticketAllowance(address owner, address spender) public override view returns(bool){
+      return TICKETS.ticketAllowance(owner, spender);
+    }
+
+    function isApproved(address user) public override view returns(bool){
+      return TICKETS.isApproved(user);
+    }
+
 
     /**
     * @notice Function used to return every ticket that are currently on sale
@@ -455,19 +477,6 @@ contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{
         }
     }
 
-    /**
-    * @notice Function used to view how much time is left for lended Ticket
-    * @dev This function returns 3 parameters
-    * - address: ticketOwner
-    * - uint256: timeLeft 
-    * - bool: false if numTries == 0
-    *         true if numTries > 0
-    */
-    function getTicketDurationLeft(uint256 ticketId) public view override returns (address, uint256, bool) {
-        return TICKETS.getTicketDurationLeft(ticketId);
-    }
-    
-
 
     /**
     *@notice  Returns an address tickets data(time, tries , onwership and price)
@@ -486,7 +495,7 @@ contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{
     * @dev - Require users MrCrypro's balance is > 0
     */
     function isVip(address user) public view override returns(bool) {
-        if((MR_CRYPTO.balanceOf(user) > 0)) {
+        if((MR_CRYPTO.balanceOf(user) > 0) || TICKETS.isApproved(user)) {
             return true;
         } else{
             return false;
@@ -547,8 +556,8 @@ contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{
     *  - uri: uri wanted to be set
     */
     function setTokenUri(uint256 tokenId, string memory _uri) public override onlyOwnerOrAdmin {
-            require(bytes(s_uris[tokenId]).length == 0, "Can not set uri twice"); 
-            s_uris[tokenId] = _uri; 
+        require(bytes(s_uris[tokenId]).length == 0, "Can not set uri twice"); 
+        s_uris[tokenId] = _uri; 
     }
 
     ////////////////////////

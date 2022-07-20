@@ -5,8 +5,8 @@ import Link from 'next/dist/client/link'
 
 export default function Home({user, userConnected}) {
   return (
-    <div className="presentacion  flex flex-col items-center  ">
-      <div className='w-full pb-96 backdrop-blur-sm pt-36  flex flex-col items-center p-8  h-96 bg-main/70 rounded'>
+    <div className="presentacion min-h-screen flex flex-col items-center  ">
+      <div className='w-full pb-96 backdrop-blur-sm pt-36  flex flex-col items-center p-8   bg-main/70 rounded'>
         <div className='flex  space-x-1 items-center mb-8'>
           <Image src="/racksLogo.png" width="200" height="70" />
           <p className='neon font-whisper text-4xl'>Items</p>
@@ -42,7 +42,7 @@ export default function Home({user, userConnected}) {
    
 
       </div>
-      <footer className='bg-soft/30 border-t py-8 pb-48 px-4 flex flex-col h-ful w-full backdrop-blur-sm'>
+      <footer className='bg-soft/30 border-t py-8 pb-48 px-4 flex flex-col  w-full backdrop-blur-sm'>
        
       </footer>
       

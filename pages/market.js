@@ -14,7 +14,7 @@ import RacksItemsv3 from '../build/contracts/RacksItemsv3.json'
 import RacksToken from '../build/contracts/RacksToken.json'
 
 
-export default function Market({user, userConnected}) {
+export default function Market() {
 
   const [marketContract,setMarketContract]= useState()
   const [tokenContract, setTokenContract] = useState()

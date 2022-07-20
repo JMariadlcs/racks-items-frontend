@@ -31,6 +31,12 @@ export default function Tickets() {
   const [loadingState, setLoadingState] = useState('not-loaded')
   
   useEffect(() => {
+    if(marketContract){
+      marketContract.on("ticketBought" , (ticketId, oldOwner, newOwner, price) =>{
+        if(oldOwner == userAddress) loadData()
+
+      })
+    }
     loadData()
     if (window.ethereum) {
       window.ethereum.on("accountsChanged", (accounts) => {
@@ -163,7 +169,7 @@ export default function Tickets() {
       try{
         setProcessing(true)
         setProcessingPhase("Cambiando las condiciones...")
-        const transaction = await marketContract.changeTicketConditions(formInput.tries.toString(), formInput.hours.toString(), formInput.price.toString())
+        const transaction = await marketContract.changeTicketConditionsFrom(useerAddress, formInput.tries.toString(), formInput.hours.toString(), formInput.price.toString())
         await transaction.wait()
         setProcessing(false)
         setProcessingPhase("")
@@ -183,7 +189,7 @@ export default function Tickets() {
 
   async function claimTicketBack(){
     try{
-    const transaction = await marketContract.claimTicketBack()
+    const transaction = await marketContract.claimTicketBackFrom(userAddress)
     await transaction.wait()
     loadData()
 
@@ -220,7 +226,7 @@ export default function Tickets() {
 
   async function unlistTicket(){
     try{
-      transaction = await marketContract.unListTicket()
+      transaction = await marketContract.unListTicketFrom(userAddress)
       await transaction.wait()
       loadData()
 
@@ -245,7 +251,7 @@ export default function Tickets() {
       try{
         setProcessing(true)
         setProcessingPhase("Listando en el mercado...")
-        const transaction = await marketContract.listTicket(formInput.tries.toString(), formInput.hours.toString(), formInput.price.toString())
+        const transaction = await marketContract.listTicketFrom(userAddress, formInput.tries.toString(), formInput.hours.toString(), formInput.price.toString())
         await transaction.wait()
         setProcessing(false)
         setProcessingPhase("")
@@ -375,7 +381,7 @@ export default function Tickets() {
                   </div>
 
                     
-                    <div className='border  flex-col lg:flex-row border-main bg-secondary  w-full  flex mb-4 justify-between px-8  rounded md:items-start items-center bg-main/70' >
+                    <div className='border  hidden flex-row border-main bg-secondary  w-full  lg:flex mb-4 justify-between px-8  rounded md:items-start items-center bg-main/70' >
                     <div className='flex justify-center items-center space-x-2 text-sm font-bold'>
                       <p className='text-main text-sm md:text-md lg:text-md'>{ticketOnSale.tries}</p>
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="main" className="bi bi-briefcase" viewBox="0 0 16 16">
@@ -444,7 +450,7 @@ export default function Tickets() {
                               }
                               }} className="button cursor-pointer flex justify-center bg-red hover:bg-red/40">
                               {ticket.ownerOrSpender==1?(
-                                <div>Vemder</div>
+                                <div>Vender</div>
 
                               ):(
                                 <div>Modificar</div>

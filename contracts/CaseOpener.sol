@@ -1,42 +1,94 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 import "./IRacksItems.sol";
 import "./ICaseOpener.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";   
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol"; 
-// 0x7a1BaC17Ccc5b313516C5E16fb24f7659aA5ebed
-// 0x4b09e658ed251bcafeebbc69400383d49f344ace09b9576fe248bb02c003fe9f
-contract caseItem is ICaseOpener , VRFConsumerBaseV2{
+// 0xbd13f08b8352A3635218ab9418E340c60d6Eb418
+// 0x121a143066e0f2f08b620784af77cccb35c6242460b4a8ee251b4b416abaebd4
+contract CaseOpener is ICaseOpener , VRFConsumerBaseV2{
 
+
+    uint256 [] public s_randomWords;
+    uint256 s_requestId;
     IRacksItems RacksItems;
     VRFCoordinatorV2Interface public immutable i_vrfCoordinator; 
     bytes32 public immutable i_gasLane;
     uint64 public immutable i_subscriptionId;
     uint32 public immutable i_callbackGasLimit;
     uint16 public constant REQUEST_CONFIRMATIONS = 3; 
-    uint32 public constant NUM_WORDS = 2; 
-    uint256 public s_randomWord;
+    uint32 public constant NUM_WORDS = 1; 
 
 
+    mapping (uint => address) private s_requestIdOfUser;
+
+    modifier notForUsers(){
+        require(msg.sender==address(RacksItems),"This function is specially reserved for the main contract.");
+        _;
+    }
+    function setAddress(address _racksItems) public{
+      RacksItems = IRacksItems(_racksItems);
+    }
     constructor(address _racksItems,address vrfCoordinatorV2, bytes32 gasLane, uint64 subscriptionId, uint32 callbackGasLimit)VRFConsumerBaseV2(vrfCoordinatorV2){
         RacksItems = IRacksItems(_racksItems);
+        /**
+        * Initialization of Chainlink VRF variables
+        */
         i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2); 
         i_gasLane = gasLane; 
         i_subscriptionId = subscriptionId;
-        i_callbackGasLimit = callbackGasLimit; 
-        
+        i_callbackGasLimit = callbackGasLimit;    
 
     }   
   
+    /**
+    * @notice Function used to 'open a case' and get an item
+    */
 
+    function _generate(address user) external override notForUsers{ 
 
-    function openCase() external override returns(uint)  {  
-        require(msg.sender == address(RacksItems));
+        uint requestId = _randomNumber();
+        s_requestIdOfUser[requestId] = user;
+
+        // uint caseSupply;
+        // uint256 [] memory itemList = RacksItems.caseLiquidity();
+        // for(uint i =0 ;i<itemList.length; i++){
+        //   caseSupply+=RacksItems.supplyOfItem(itemList[i]);
+        // }
+        // _randomNumber();
+        // uint256 randomNumber = s_randomWord  % caseSupply;
+        // uint256 totalCount = 0;
+        // uint256 item;
+
+        // for(uint256 i = 0 ; i < itemList.length; i++) {
+        //   uint256 _newTotalCount = totalCount + RacksItems.supplyOfItem(itemList[i]) ;
+        //   if(randomNumber > _newTotalCount) {
+        //     totalCount = _newTotalCount;
+        //   }else {
+        //     item = itemList[i];
+        //     break;
+        //   }
+        // }
+       
+       
+    }
+
+    
+     /**
+    * @notice Used to get an actually Random Number -> to pick an item when openning a case
+    * @dev Uses Chainlink VRF -> call requestRandomWords method by using o_vrfCoordinator object
+    * set as internal because is going to be called only when a case is opened
+    */
+
+    function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) internal override {
+        address recipient = s_requestIdOfUser[requestId];
         uint caseSupply;
         uint256 [] memory itemList = RacksItems.caseLiquidity();
         for(uint i =0 ;i<itemList.length; i++){
           caseSupply+=RacksItems.supplyOfItem(itemList[i]);
         }
-        uint256 randomNumber = _randomNumber()  % caseSupply;
+
+        uint256 randomNumber = s_randomWords[0]  % caseSupply;
         uint256 totalCount = 0;
         uint256 item;
 
@@ -49,19 +101,7 @@ contract caseItem is ICaseOpener , VRFConsumerBaseV2{
             break;
           }
         }
-        return item;
-       
-    }
-
-    
-     /**
-    * @notice Used to get an actually Random Number -> to pick an item when openning a case
-    * @dev Uses Chainlink VRF -> call requestRandomWords method by using o_vrfCoordinator object
-    * set as internal because is going to be called only when a case is opened
-    */
-
-    function fulfillRandomWords(uint256 /* requestId */, uint256[] memory randomWords) internal override {
-        s_randomWord = randomWords[0]; // just in case random number is very long we apply modular function 
+        RacksItems.fullfillCaseRequest(recipient, item); 
     }
 
     /**

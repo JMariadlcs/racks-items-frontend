@@ -1,47 +1,45 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 import "./ITickets.sol";
 import "./IRacksItems.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol"; 
 
-    contract Tickets is ITickets{
-        IRacksItems RacksItems;
-        IERC721Enumerable MR_CRYPTO;
-        uint256 private s_ticketCount;
-        mapping(address => bool) private s_isSellingTicket;
-        mapping(address => bool) private s_hasTicket; 
-        mapping(address => bool) private s_hadTicket;
-        mapping(address => bool) private s_ticketIsLended;
-        mapping(address => uint256) s_lastTicket;
-        mapping(uint => bool) s_isLocked;
-        mapping(address => uint256[]) s_locked_mrCrypto;
-        caseTicket[] private _tickets;
+contract Tickets is ITickets{
 
-        constructor(address _racksItems, address _mrCrypto){
-           RacksItems = IRacksItems(_racksItems);
-           MR_CRYPTO = IERC721Enumerable(_mrCrypto);
+    IRacksItems RacksItems;
+    IERC721Enumerable MR_CRYPTO;
+    uint256 private s_ticketCount;
+    mapping(address => mapping(address => bool)) ticketApprovals;
+    mapping (address => bool) approved;
+    mapping(address => bool) private s_isSellingTicket;
+    mapping(address => bool) private s_hasTicket; 
+    mapping(address => bool) private s_hadTicket;
+    mapping(address => bool) private s_ticketIsLended;
+    mapping(address => uint256) s_lastTicket;
+    mapping(uint => bool) s_isLocked;
+    mapping(address => uint256[]) s_locked_mrCrypto;
+    caseTicket[] private _tickets;
 
+    modifier notForUsers(){
+       require(msg.sender==address(RacksItems),"This function is specially reserved for the main contract.");
+       _;
+    }
+    constructor(address _racksItems, address _mrCrypto){
+       RacksItems = IRacksItems(_racksItems);
+       MR_CRYPTO = IERC721Enumerable(_mrCrypto);  
+    }
+
+    
+    function _listT(address from ,uint256 numTries, uint256 _hours, uint256 price, address user) external notForUsers  override{
+        if(from!=user){
+            require(ticketAllowance(from, user));
         }
-     /**
-    * @notice This function is used for a VIP user to list 'Case Tickets' on the MarketPlace
-    * @dev - Should check that user is Vip (Modifier)
-    * - Check is user has had a ticket before
-    *     - If so: check that is has ticket now
-    *     - if not: create ticket (first ticket in live for this user)
-    * - Should check that user is NOT currently selling another ticket -> Users can only sell 1 ticket at the same time
-    * - Include ticket on array
-    * - Increase s_ticketCount
-    * - Set mapping to true
-    * - Emit event
-    *
-    */
-    function listTicket(uint256 numTries, uint256 _hours, uint256 price, address user) external  override{
-        
-        require(msg.sender==address(RacksItems));
-        require(!s_isSellingTicket[user], "User is already currently selling a Ticket");
-        if(s_hadTicket[user]) {
-            require(s_hasTicket[user], "User has not ticket avaliable");
+
+        require(!s_isSellingTicket[from], "User is already currently selling a Ticket");
+        if(s_hadTicket[from]) {
+            require(s_hasTicket[from] , "User has not ticket avaliable");
         }
-        bool success = _lockMrCrypto(user);
+        bool success = _lockMrCrypto(from);
         require(success,"Sorry, you already have a Mr Crypto on use.");
         _tickets.push(
         caseTicket(
@@ -49,46 +47,39 @@ import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
         numTries,
         _hours,
         price,
-        user,
+        from,
         0,
         true
         ));
 
-        s_lastTicket[user] = s_ticketCount;
+        s_lastTicket[from] = s_ticketCount;
         s_ticketCount++;
-        s_isSellingTicket[user] = true;
-        s_hadTicket[user] = true;
-        s_hasTicket[user] = false;
+        s_isSellingTicket[from] = true;
+        s_hadTicket[from] = true;
+        s_hasTicket[from] = false;
     }
 
-     /**
-    * @notice This function is used for a VIP user to unlist 'Case Tickets' on the MarketPlace
-    * @dev - Should check that user is Vip (Modifier)
-    * - Should check that user has a listed ticket
-    * - Emit event
-    */
-    function unListTicket(address user) external override{
-        require(msg.sender==address(RacksItems));
-        uint ticketId = s_lastTicket[user];
-        require(s_isSellingTicket[user], "User is not currently selling a Ticket");
-        require(_tickets[ticketId].owner == user, "User is not owner of this ticket");
+    function _unlistT(address from, address user) external notForUsers override{
+        if(from!=user){
+            require(ticketAllowance(from, user));
+        }
+        
+        uint ticketId = s_lastTicket[from];
+        require(s_isSellingTicket[from], "User is not currently selling a Ticket");
+        require(_tickets[ticketId].owner == from, "User is not owner of this ticket");
         _tickets[ticketId].isAvaliable = false;
-        s_isSellingTicket[user] = false;
-        s_hasTicket[user] = true;
-        _unlockMrCrypto(user);
+        s_isSellingTicket[from] = false;
+        s_hasTicket[from] = true;
+        _unlockMrCrypto(from);
      
     }
 
-    /**
-    * @notice This function is used for a VIP user to change 'Case Tickets' price and tries on the MarketPlace
-    * @dev - Should check that user is Vip (Modifier)
-    * - Should check that user has a listed ticket
-    * - Emit event
-    */
-    function changeTicketConditions(uint256 newTries, uint256 newHours, uint256 newPrice, address user) external override{
-        require(msg.sender==address(RacksItems));
-        uint ticketId = s_lastTicket[user];
-        require(s_isSellingTicket[user], "User is not currently selling a Ticket");
+    function _changeT(address from , uint256 newTries, uint256 newHours, uint256 newPrice, address user) external notForUsers override{
+        if(from!=user){
+            require(ticketAllowance(from,user));
+        }
+        uint ticketId = s_lastTicket[from];
+        require(s_isSellingTicket[from], "User is not currently selling a Ticket");
         require(_tickets[ticketId].owner == user, "User is not owner of this ticket");
         _tickets[ticketId].price = newPrice;
         _tickets[ticketId].duration = newHours;
@@ -96,17 +87,8 @@ import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
      
     }
 
-    /**
-    * @notice This function is used to buy a caseTicket
-    * @dev - Should check that user is NOT Vip -> does make sense that a VIP user buys a ticket
-    * - Should check that user has a listed ticket
-    * - Transfer RacksToken from buyer to seller
-    * - Update mappings variables
-    * - Emit event
-    */
-    function buyTicket(uint256 ticketId, address user) external override{
+    function _buyT(uint256 ticketId, address user) external notForUsers override{
 
-        require(msg.sender==address(RacksItems));
         require(RacksItems.isVip(user)==false, "A VIP user can not buy a ticket");
         require(_tickets[ticketId].owner != user, "You can not buy a ticket to your self");
         require(_tickets[ticketId].isAvaliable == true, "Ticket is not currently avaliable");    
@@ -128,30 +110,48 @@ import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
     * - Update mappings
     * - Emit event
     */
-    function claimTicketBack(address user) external override{
 
-        require(msg.sender==address(RacksItems));
-        uint ticketId = s_lastTicket[user];
-        require(s_ticketIsLended[user], "User did not sell any Ticket");
-        require((_tickets[ticketId].numTries == 0) || (((block.timestamp - _tickets[ticketId].timeWhenSold)/60) == (_tickets[ticketId].duration * 60)), "Duration of the Ticket or numTries is still avaliable");
+    function _claimT(address from , address user) external notForUsers override{
+        if(from!=user){
+            require(ticketAllowance(from,user));
+        }
+        uint ticketId = s_lastTicket[from];
+        require(s_ticketIsLended[from], "User did not sell any Ticket");
+        require((_tickets[ticketId].numTries == 0) || (((block.timestamp - _tickets[ticketId].timeWhenSold)/60) >= (_tickets[ticketId].duration * 60)), "Duration of the Ticket or numTries is still avaliable");
         s_hasTicket[_tickets[ticketId].owner] = false;
-        s_hasTicket[user] = true;
-        s_ticketIsLended[user] = false;
+        s_hasTicket[from] = true;
+        s_ticketIsLended[from] = false;
         _unlockMrCrypto(user);
   
     }
-     function getUserTicket(address user) external view override returns(uint256 durationLeft, uint256 triesLeft, uint ownerOrSpender, uint256 ticketPrice) {
-        require(msg.sender==address(RacksItems));
+
+    /** @notice Function used to decrease Ticket tries avaliables
+    * @dev - Check if used trie was last one
+    *        - If not: just decrease numTries
+    *        - If so: decrease numTries, update Avaliability and mappings
+    */
+
+    function _decreaseT(address user) external notForUsers override {
+        uint ticketId = s_lastTicket[user];
+        if(_tickets[ticketId].numTries != 1) { // Case it was not the last try avaliable
+            _tickets[ticketId].numTries--;
+        }else { // it was his last try avaliable
+            _tickets[ticketId].numTries--;
+            s_hasTicket[user] = false;
+        }
+
+     }
+     function getUserTicket(address user) public view override returns(uint256 durationLeft, uint256 triesLeft, uint ownerOrSpender, uint256 ticketPrice) {
         if(_ticketOwnership(user)==1 || _ticketOwnership(user)==0 || _ticketOwnership(user)==4){
           return(0,0,_ticketOwnership(user), 0);
         }else{
         uint256 ticketId = s_lastTicket[user];
-        (,uint256 timeLeft,) = getTicketDurationLeft(ticketId);
+        uint256 timeLeft = _getTicketDurationLeft(ticketId);
         return (timeLeft, _tickets[ticketId].numTries, _ticketOwnership(user), _tickets[ticketId].price);
         }
     }
 
-    function getMarketTicket(uint256 ticketId) external override view returns( uint256 numTries, uint256 duration, uint256 price, address owner, uint256 timeWhenSold, bool isAvaliable){
+    function getMarketTicket(uint256 ticketId) public override view returns( uint256 numTries, uint256 duration, uint256 price, address owner, uint256 timeWhenSold, bool isAvaliable){
         caseTicket memory ticket = _tickets[ticketId];  
         return(
             ticket.numTries,
@@ -180,6 +180,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
     */
 
     function _ticketOwnership(address user) internal view returns(uint ownerOrSpender){
+      require(msg.sender==address(RacksItems), "This function is specially reserved for the main contract.");
       uint ticketOwnership;
       if (RacksItems.isVip(user) && !s_isSellingTicket[user] &&  !s_ticketIsLended[user]){
         ticketOwnership=1;
@@ -195,31 +196,25 @@ import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
       return ticketOwnership;
     }
 
-    /** @notice Function used to decrease Ticket tries avaliables
-    * @dev - Check if used trie was last one
-    *        - If not: just decrease numTries
-    *        - If so: decrease numTries, update Avaliability and mappings
-    */
-    function decreaseTicketTries(address user) external override {
 
-    require(msg.sender == address(RacksItems));
-    uint ticketId = s_lastTicket[user];
-            if(_tickets[ticketId].numTries != 1) { // Case it was not the last trie avaliable
-                _tickets[ticketId].numTries--;
-            }else { // it was his last trie avaliable
-                _tickets[ticketId].numTries--;
-                s_hasTicket[user] = false;
-            }
+   
+
+
+    function _approveT(address owner, address spender, bool permission) external notForUsers override {
+      ticketApprovals[owner][spender]=permission;
+    }
+
+    function ticketAllowance(address owner, address spender) public override view returns(bool){
+      return ticketApprovals[owner][spender];
+    }
+
+    function isApproved(address user) public override view returns(bool){
+      return approved[user];
+    }
+
     
-     }
-
- 
-
-    /**
-    * @notice Function used to return every ticket that are currently on sale
-    */
     function getTicketsOnSale() public view override returns(caseTicket[] memory) {
-        require(msg.sender==address(RacksItems));
+        require(msg.sender==address(RacksItems), "This function is specially reserved for the main contract.");
         uint arrayLength;
 
         for(uint i=0; i<_tickets.length;i++){
@@ -240,29 +235,31 @@ import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
         return tickets;
     }
 
-     function getTicketDurationLeft(uint256 ticketId) public view override returns (address, uint256, bool) {
-            require(_tickets[ticketId].timeWhenSold>0, "Ticket is not sold yet");
+     function _getTicketDurationLeft(uint256 ticketId) internal view  returns (uint256) {
             uint256 timeLeft;
-            if ((_tickets[ticketId].numTries == 0)) {
-              if((((block.timestamp - _tickets[ticketId].timeWhenSold)/60) == (_tickets[ticketId].duration * 60))) {
-                timeLeft = 0;
-                return (_tickets[ticketId].owner, timeLeft, false);
-              }else {
-                timeLeft = (_tickets[ticketId].duration * 60) - ((block.timestamp - _tickets[ticketId].timeWhenSold)/60);
-                return (_tickets[ticketId].owner, timeLeft, false);
-              } 
-            } else {
-              if((((block.timestamp - _tickets[ticketId].timeWhenSold)/60) == (_tickets[ticketId].duration * 60))) {
-                timeLeft = 0;
-                return (_tickets[ticketId].owner, timeLeft, true);
-              }else {
-                timeLeft = (_tickets[ticketId].duration * 60) - ((block.timestamp - _tickets[ticketId].timeWhenSold)/60);
-                return (_tickets[ticketId].owner, timeLeft, true);
-              } 
-            }
+            if((((block.timestamp - _tickets[ticketId].timeWhenSold)/60) >= (_tickets[ticketId].duration * 60))) {
+              timeLeft = 0;
+              return (timeLeft);
+            }else {
+              timeLeft = (_tickets[ticketId].duration * 60) - ((block.timestamp - _tickets[ticketId].timeWhenSold)/60);
+              return (timeLeft);
+            } 
+            
     }
+     //////////////////////////
+    //  MR Crypto functions // 
+    /////////////////////////
 
-     function _mrCryproWallet(address user) internal  view returns (uint256[] memory){
+    /**
+    *@notice This functions are meant to prevent a security issue.
+    *Thank to this functions each Mr Crypto can only have one ticket at every moment, so even if someone sends it to other wallet wont be able to use a ticket till is unlocked
+    */
+
+
+    /**
+    *@notice Returns the IDs of all the Mr Cryptos owned by a user
+    */
+    function _mrCryproWallet(address user) internal  view returns (uint256[] memory){
 
         uint256 ownerTokenCount = MR_CRYPTO.balanceOf(user);
         uint256[] memory tokenIds = new uint256[](ownerTokenCount);
@@ -272,6 +269,9 @@ import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
         return tokenIds;
     }
 
+    /**
+    *@dev This functions saves the id of the mr crypto used to sell a ticket in a mapping
+    */
     function _lockMrCrypto(address user) internal returns (bool){
         bool success;
         uint [] memory wallet = _mrCryproWallet(user);
@@ -285,7 +285,9 @@ import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
         return success;
         
     }
-
+    /**
+    *@dev After a ticket live is over and the owner gets his ticket back his MrCrypto will be able to sell tickets again using the mapping
+    */
     function _unlockMrCrypto(address user) internal {
         uint [] memory locked = s_locked_mrCrypto[user];
         for(uint i=0; i<locked.length; i++){
@@ -297,10 +299,11 @@ import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
         }
     }
 
-    function getTicketCount() public view returns(uint256) {
-        return s_ticketCount;
+    //Returns current ticket count.
+    function getTicketCount() public override view returns(uint256) {
+      return s_ticketCount;
     }
 
 
 
-    }
+}

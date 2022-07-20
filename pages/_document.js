@@ -14,7 +14,7 @@ export default function Document() {
       </Head>
 
       
-      <body className=" bg-main font-monument  text-secondary scroll-smooth">
+      <body className=" bg-main font-monument text-md  text-secondary scroll-smooth">
         <Main />
         <NextScript />
       </body>

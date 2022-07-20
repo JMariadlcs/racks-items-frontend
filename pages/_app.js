@@ -39,6 +39,8 @@ function MyApp({ Component, pageProps }) {
       console.log("Error connecting...")
     }
   }
+
+  
   return (
   <div>
     <header className='px-8 py-4 flex justify-between border-b border-secondary'>

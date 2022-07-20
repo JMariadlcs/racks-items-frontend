@@ -29,7 +29,9 @@ interface IRacksItems {
     event ticketBought(uint256 ticketId, address oldOwner, address newOwner, uint256 price);
     event ticketClaimedBack( address realOwner);
 
-    function openCase() external;
+    function openCase() external returns(bool success);
+    
+    function fullfillCaseRequest(address user, uint item) external;
 
     function caseLiquidity() external view returns(uint256[] memory);
 
@@ -50,21 +52,25 @@ interface IRacksItems {
 
     function getItemsOnSale() external view returns(itemOnSale[] memory);
 
-    function listTicket(uint256 numTries, uint256 _hours, uint256 price) external;
+    function listTicketFrom(address from, uint256 numTries, uint256 _hours, uint256 price) external;
 
-    function unListTicket() external;
+    function unListTicketFrom(address from) external;
 
-    function changeTicketConditions( uint256 newTries, uint256 newHours, uint256 newPrice) external;
+    function changeTicketConditionsFrom( address from, uint256 newTries, uint256 newHours, uint256 newPrice) external;
 
     function buyTicket(uint256 ticketId) external;
 
-    function claimTicketBack() external;
+    function claimTicketBackFrom(address from) external;
+
+    function approveForTickets( address spender, bool permission) external;
+
+    function ticketAllowance(address owner, address spender) external view returns(bool);
+
+    function isApproved(address user) external view returns(bool);
 
     function getMarketTicket(uint256 ticketId) external view returns( uint256 numTries, uint256 duration, uint256 price, address owner, uint256 timeWhenSold, bool isAvaliable);
 
     function getTicketsOnSale() external view returns(ITickets.caseTicket[] memory);
-
-    function getTicketDurationLeft(uint256 ticketId) external view returns (address, uint256, bool);
 
     function getUserTicket(address user) external view returns(uint256 durationLeft, uint256 triesLeft, uint ownerOrSpender, uint256 ticketPrice);
 

@@ -1,0 +1,245 @@
+{
+  "contractName": "ICaseOpener",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        }
+      ],
+      "name": "_generate",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.10+commit.fc410830\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"}],\"name\":\"_generate\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/ICaseOpener.sol\":\"ICaseOpener\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/ICaseOpener.sol\":{\"keccak256\":\"0x32f9928c5f59cec1c7fb7a6b685eb5e835ec10c09d3a92e09bf88943d85319d7\",\"urls\":[\"bzz-raw://b46d2601c9278b9193809133f229c585b9e075816bf070ff6f5def8ba3b68bae\",\"dweb:/ipfs/QmbwHTxG9ead6AVVEuNmQ7KcjCDhB33qKW4dZ38gtBnE2t\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "\r\npragma solidity ^0.8.0;\r\n\r\n\r\ninterface ICaseOpener {\r\n\r\n    function _generate(address user) external  ;\r\n\r\n\r\n}",
+  "sourcePath": "C:\\Users\\oteri\\Desktop\\racs-items\\racks-items-frontend\\contracts\\ICaseOpener.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/ICaseOpener.sol",
+    "exportedSymbols": {
+      "ICaseOpener": [
+        3075
+      ]
+    },
+    "id": 3076,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 3069,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "2:23:19"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "ICaseOpener",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 3075,
+        "linearizedBaseContracts": [
+          3075
+        ],
+        "name": "ICaseOpener",
+        "nameLocation": "41:11:19",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "functionSelector": "831cbb6b",
+            "id": 3074,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_generate",
+            "nameLocation": "71:9:19",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 3072,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3071,
+                  "mutability": "mutable",
+                  "name": "user",
+                  "nameLocation": "89:4:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3074,
+                  "src": "81:12:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 3070,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "81:7:19",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "80:14:19"
+            },
+            "returnParameters": {
+              "id": 3073,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "105:0:19"
+            },
+            "scope": 3075,
+            "src": "62:44:19",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 3076,
+        "src": "31:82:19",
+        "usedErrors": []
+      }
+    ],
+    "src": "2:111:19"
+  },
+  "legacyAST": {
+    "absolutePath": "project:/contracts/ICaseOpener.sol",
+    "exportedSymbols": {
+      "ICaseOpener": [
+        3075
+      ]
+    },
+    "id": 3076,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 3069,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "2:23:19"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "ICaseOpener",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 3075,
+        "linearizedBaseContracts": [
+          3075
+        ],
+        "name": "ICaseOpener",
+        "nameLocation": "41:11:19",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "functionSelector": "831cbb6b",
+            "id": 3074,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_generate",
+            "nameLocation": "71:9:19",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 3072,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3071,
+                  "mutability": "mutable",
+                  "name": "user",
+                  "nameLocation": "89:4:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3074,
+                  "src": "81:12:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 3070,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "81:7:19",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "80:14:19"
+            },
+            "returnParameters": {
+              "id": 3073,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "105:0:19"
+            },
+            "scope": 3075,
+            "src": "62:44:19",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 3076,
+        "src": "31:82:19",
+        "usedErrors": []
+      }
+    ],
+    "src": "2:111:19"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.10+commit.fc410830.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.3",
+  "updatedAt": "2022-07-20T12:34:47.127Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

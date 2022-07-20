@@ -11,7 +11,6 @@ import {
 import {itemList} from "../itemList"
 import RacksItemsv3 from '../build/contracts/RacksItemsv3.json'
 
-import { render } from 'react-dom'
 
 
 export default function Inventory() {
@@ -169,6 +168,7 @@ export default function Inventory() {
         setProcessing(false)
         setShowForm(false)
         setShowItemData(false)
+        setShowModify(false)
         loadItems()
         setProcessingPhase("")
 

@@ -15,7 +15,7 @@ import {
   tokenAddress
 } from '../config'
 
-export default function Opencase({user, userConnected}) {
+export default function Opencase() {
   const [marketContract, setMarketContract] = useState()
   const [tokenContract, setTokenContract] = useState()
   const [userAddress, setUserAddress] = useState("")
