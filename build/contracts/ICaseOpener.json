@@ -29,14 +29,14 @@
     "absolutePath": "project:/contracts/ICaseOpener.sol",
     "exportedSymbols": {
       "ICaseOpener": [
-        2960
+        2973
       ]
     },
-    "id": 2961,
+    "id": 2974,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 2954,
+        "id": 2967,
         "literals": [
           "solidity",
           "^",
@@ -53,9 +53,9 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "fullyImplemented": false,
-        "id": 2960,
+        "id": 2973,
         "linearizedBaseContracts": [
-          2960
+          2973
         ],
         "name": "ICaseOpener",
         "nameLocation": "41:11:19",
@@ -63,7 +63,7 @@
         "nodes": [
           {
             "functionSelector": "831cbb6b",
-            "id": 2959,
+            "id": 2972,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
@@ -71,17 +71,17 @@
             "nameLocation": "71:9:19",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2957,
+              "id": 2970,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2956,
+                  "id": 2969,
                   "mutability": "mutable",
                   "name": "user",
                   "nameLocation": "89:4:19",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2959,
+                  "scope": 2972,
                   "src": "81:12:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -90,7 +90,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2955,
+                    "id": 2968,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "81:7:19",
@@ -106,19 +106,19 @@
               "src": "80:14:19"
             },
             "returnParameters": {
-              "id": 2958,
+              "id": 2971,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "105:0:19"
             },
-            "scope": 2960,
+            "scope": 2973,
             "src": "62:44:19",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 2961,
+        "scope": 2974,
         "src": "31:82:19",
         "usedErrors": []
       }
@@ -129,14 +129,14 @@
     "absolutePath": "project:/contracts/ICaseOpener.sol",
     "exportedSymbols": {
       "ICaseOpener": [
-        2960
+        2973
       ]
     },
-    "id": 2961,
+    "id": 2974,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 2954,
+        "id": 2967,
         "literals": [
           "solidity",
           "^",
@@ -153,9 +153,9 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "fullyImplemented": false,
-        "id": 2960,
+        "id": 2973,
         "linearizedBaseContracts": [
-          2960
+          2973
         ],
         "name": "ICaseOpener",
         "nameLocation": "41:11:19",
@@ -163,7 +163,7 @@
         "nodes": [
           {
             "functionSelector": "831cbb6b",
-            "id": 2959,
+            "id": 2972,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
@@ -171,17 +171,17 @@
             "nameLocation": "71:9:19",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2957,
+              "id": 2970,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2956,
+                  "id": 2969,
                   "mutability": "mutable",
                   "name": "user",
                   "nameLocation": "89:4:19",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2959,
+                  "scope": 2972,
                   "src": "81:12:19",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -190,7 +190,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2955,
+                    "id": 2968,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "81:7:19",
@@ -206,19 +206,19 @@
               "src": "80:14:19"
             },
             "returnParameters": {
-              "id": 2958,
+              "id": 2971,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "105:0:19"
             },
-            "scope": 2960,
+            "scope": 2973,
             "src": "62:44:19",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 2961,
+        "scope": 2974,
         "src": "31:82:19",
         "usedErrors": []
       }
@@ -231,7 +231,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.3",
-  "updatedAt": "2022-07-21T22:02:36.732Z",
+  "updatedAt": "2022-07-21T22:15:35.025Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},
