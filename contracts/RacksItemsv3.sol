@@ -37,7 +37,7 @@ contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{
     ContractState private s_contractState;
     itemOnSale[] private _marketItems;
 
-
+    bytes [] public s_caseResults;//all the results of all the cases ever opened
 
 
     /// @notice Mappings
@@ -166,6 +166,9 @@ contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{
             break;
           }
         }
+         s_caseResults.push (
+             abi.encodePacked(_user, item)
+        );
         _safeTransferFrom(address(this), _user ,  item , 1,"");
         emit CaseOpened(msg.sender, casePrice, item);
 

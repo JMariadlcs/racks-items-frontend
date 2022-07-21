@@ -8,7 +8,7 @@ import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 // 0x121a143066e0f2f08b620784af77cccb35c6242460b4a8ee251b4b416abaebd4
 contract CaseOpener is ICaseOpener , VRFConsumerBaseV2{
 
-    bytes [] public s_caseRequests;
+    
     IRacksItems RacksItems;
     VRFCoordinatorV2Interface public immutable i_vrfCoordinator; 
     bytes32 public immutable i_gasLane;
@@ -63,9 +63,6 @@ contract CaseOpener is ICaseOpener , VRFConsumerBaseV2{
     function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) internal override {
         address recipient = s_requestIdOfUser[requestId];
         uint randomNumber = randomWords[0];
-        s_caseRequests.push (
-             abi.encodePacked(recipient, randomNumber)
-        );
         RacksItems.fulfillCaseRequest(recipient, randomNumber); 
     }
 
