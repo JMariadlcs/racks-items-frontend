@@ -4,11 +4,11 @@ pragma solidity ^0.8.0;
 import "./ICaseOpener.sol";
 import "./IRacksItems.sol";
 import "./ITickets.sol";
-import "../node_modules/@openzeppelin/contracts/access/AccessControl.sol"; 
-import "../node_modules/@openzeppelin/contracts/token/ERC1155/ERC1155.sol"; 
-import "../node_modules/@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol"; 
-import "../node_modules/@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol"; 
-import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol"; 
+import "@openzeppelin/contracts/access/AccessControl.sol"; 
+import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol"; 
+import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol"; 
+import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol"; 
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol"; 
 
 contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{ 
    
@@ -120,11 +120,8 @@ contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{
     * @notice Function used to 'open a case' and get an item
     * @dev 
     * - Should check that user owns a Ticket -> modifier
-    * - Should check that msg.value is bigger than casePrice
-    * - Should transfer msg.value to the contract
-    * - Internally calls randomNumber() 
-    * - Apply modular function for the randomNumber to be between 0 and totalSupply of items
-    * - Should choose an item
+    * - Should transfer case price to the contract
+    * - Internally calls the case opener contract to get a random number from Chainlink VRF 
     */
     function openCase() public override supplyAvaliable contractIsActive returns(bool success){  
         if (MR_CRYPTO.balanceOf(msg.sender) < 1) {
@@ -141,7 +138,12 @@ contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{
        
         return true;
     }
-
+    /**
+    * @notice This function is called back by the Chainlink Oracle after requesting a random number
+    * The function receives a random number and the user that originally opened the case
+    * Apply modular function for the randomNumber to be between 0 and totalSupply of items
+    * Algorithmically pick an item based on the random number and statistics of its item
+    */
 
     function fulfillCaseRequest(address _user, uint _randomNumber) external override{
         require(msg.sender == address (CASE_OPENER));

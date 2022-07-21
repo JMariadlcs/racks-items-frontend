@@ -2,8 +2,8 @@
 pragma solidity ^0.8.0;
 import "./IRacksItems.sol";
 import "./ICaseOpener.sol";
-import "../node_modules/@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";   
-import "../node_modules/@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol"; 
+import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";   
+import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol"; 
 // 0xbd13f08b8352A3635218ab9418E340c60d6Eb418
 // 0x121a143066e0f2f08b620784af77cccb35c6242460b4a8ee251b4b416abaebd4
 contract CaseOpener is ICaseOpener , VRFConsumerBaseV2{
@@ -18,15 +18,13 @@ contract CaseOpener is ICaseOpener , VRFConsumerBaseV2{
     uint32 public constant NUM_WORDS = 1; 
 
 
-    mapping (uint => address) private s_requestIdOfUser;
+    mapping (uint => address) private s_requestIdOfUser; // maps each requestId to the user that made it
 
     modifier notForUsers(){
         require(msg.sender==address(RacksItems),"This function is specially reserved for the main contract.");
         _;
     }
-    function setAddress(address _racksItems) public{
-        RacksItems = IRacksItems(_racksItems);
-    }
+    
     constructor(address _racksItems,address vrfCoordinatorV2, bytes32 gasLane, uint64 subscriptionId, uint32 callbackGasLimit)VRFConsumerBaseV2(vrfCoordinatorV2){
         RacksItems = IRacksItems(_racksItems);
         /**
@@ -41,6 +39,7 @@ contract CaseOpener is ICaseOpener , VRFConsumerBaseV2{
   
     /**
     * @notice Function used to 'open a case' and get an item
+    * @dev Saves thr requestId made to ChainlinkVRF in order to identify the user later
     */
 
     function _generate(address user) external override notForUsers{ 
@@ -56,7 +55,8 @@ contract CaseOpener is ICaseOpener , VRFConsumerBaseV2{
     
      /**
     * @notice Used to get an actually Random Number -> to pick an item when openning a case
-    * @dev Uses Chainlink VRF -> call requestRandomWords method by using o_vrfCoordinator object
+    * @dev Uses Chainlink VRF -> When the oracle returns the random number back calls the main contract passing the random number and the user that made the call
+    * The main contract will then pick the item the user won based on the random number and will send it to him.
     * set as internal because is going to be called only when a case is opened
     */
 
