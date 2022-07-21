@@ -7261,30 +7261,30 @@
     "absolutePath": "project:/contracts/RacksToken.sol",
     "exportedSymbols": {
       "Context": [
-        8910
+        8892
       ],
       "ERC20": [
-        7094
+        7076
       ],
       "IERC20": [
-        7172
+        7154
       ],
       "IERC20Metadata": [
-        7197
+        7179
       ],
       "Ownable": [
-        6508
+        6490
       ],
       "RacksToken": [
-        5211
+        5193
       ]
     },
-    "id": 5212,
+    "id": 5194,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 5190,
+        "id": 5172,
         "literals": [
           "solidity",
           "^",
@@ -7297,11 +7297,11 @@
       {
         "absolutePath": "project:/node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol",
         "file": "../node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol",
-        "id": 5191,
+        "id": 5173,
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
-        "scope": 5212,
-        "sourceUnit": 7095,
+        "scope": 5194,
+        "sourceUnit": 7077,
         "src": "60:71:25",
         "symbolAliases": [],
         "unitAlias": ""
@@ -7309,11 +7309,11 @@
       {
         "absolutePath": "project:/node_modules/@openzeppelin/contracts/access/Ownable.sol",
         "file": "../node_modules/@openzeppelin/contracts/access/Ownable.sol",
-        "id": 5192,
+        "id": 5174,
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
-        "scope": 5212,
-        "sourceUnit": 6509,
+        "scope": 5194,
+        "sourceUnit": 6491,
         "src": "133:68:25",
         "symbolAliases": [],
         "unitAlias": ""
@@ -7325,7 +7325,7 @@
             "arguments": [
               {
                 "hexValue": "5261636b7320546f6b656e",
-                "id": 5195,
+                "id": 5177,
                 "isConstant": false,
                 "isLValue": false,
                 "isPure": true,
@@ -7341,7 +7341,7 @@
               },
               {
                 "hexValue": "52434b",
-                "id": 5196,
+                "id": 5178,
                 "isConstant": false,
                 "isLValue": false,
                 "isPure": true,
@@ -7357,13 +7357,13 @@
               }
             ],
             "baseName": {
-              "id": 5194,
+              "id": 5176,
               "name": "ERC20",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 7094,
+              "referencedDeclaration": 7076,
               "src": "287:5:25"
             },
-            "id": 5197,
+            "id": 5179,
             "nodeType": "InheritanceSpecifier",
             "src": "287:27:25"
           }
@@ -7372,19 +7372,19 @@
         "contractDependencies": [],
         "contractKind": "contract",
         "documentation": {
-          "id": 5193,
+          "id": 5175,
           "nodeType": "StructuredDocumentation",
           "src": "205:57:25",
           "text": "This is a representation of the RacksToken."
         },
         "fullyImplemented": true,
-        "id": 5211,
+        "id": 5193,
         "linearizedBaseContracts": [
-          5211,
-          7094,
-          7197,
-          7172,
-          8910
+          5193,
+          7076,
+          7179,
+          7154,
+          8892
         ],
         "name": "RacksToken",
         "nameLocation": "273:10:25",
@@ -7392,7 +7392,7 @@
         "nodes": [
           {
             "body": {
-              "id": 5209,
+              "id": 5191,
               "nodeType": "Block",
               "src": "415:55:25",
               "statements": [
@@ -7400,11 +7400,11 @@
                   "expression": {
                     "arguments": [
                       {
-                        "id": 5205,
+                        "id": 5187,
                         "name": "_to",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5199,
+                        "referencedDeclaration": 5181,
                         "src": "433:3:25",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -7412,11 +7412,11 @@
                         }
                       },
                       {
-                        "id": 5206,
+                        "id": 5188,
                         "name": "_amount",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5201,
+                        "referencedDeclaration": 5183,
                         "src": "438:7:25",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -7435,18 +7435,18 @@
                           "typeString": "uint256"
                         }
                       ],
-                      "id": 5204,
+                      "id": 5186,
                       "name": "_mint",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 6911,
+                      "referencedDeclaration": 6893,
                       "src": "427:5:25",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_uint256_$returns$__$",
                         "typeString": "function (address,uint256)"
                       }
                     },
-                    "id": 5207,
+                    "id": 5189,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -7461,14 +7461,14 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 5208,
+                  "id": 5190,
                   "nodeType": "ExpressionStatement",
                   "src": "427:19:25"
                 }
               ]
             },
             "functionSelector": "40c10f19",
-            "id": 5210,
+            "id": 5192,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -7476,17 +7476,17 @@
             "nameLocation": "373:4:25",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5202,
+              "id": 5184,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5199,
+                  "id": 5181,
                   "mutability": "mutable",
                   "name": "_to",
                   "nameLocation": "386:3:25",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5210,
+                  "scope": 5192,
                   "src": "378:11:25",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -7495,7 +7495,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5198,
+                    "id": 5180,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "378:7:25",
@@ -7509,12 +7509,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 5201,
+                  "id": 5183,
                   "mutability": "mutable",
                   "name": "_amount",
                   "nameLocation": "399:7:25",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5210,
+                  "scope": 5192,
                   "src": "391:15:25",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -7523,7 +7523,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5200,
+                    "id": 5182,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "391:7:25",
@@ -7538,19 +7538,19 @@
               "src": "377:30:25"
             },
             "returnParameters": {
-              "id": 5203,
+              "id": 5185,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "415:0:25"
             },
-            "scope": 5211,
+            "scope": 5193,
             "src": "364:106:25",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "public"
           }
         ],
-        "scope": 5212,
+        "scope": 5194,
         "src": "264:209:25",
         "usedErrors": []
       }
@@ -7561,30 +7561,30 @@
     "absolutePath": "project:/contracts/RacksToken.sol",
     "exportedSymbols": {
       "Context": [
-        8910
+        8892
       ],
       "ERC20": [
-        7094
+        7076
       ],
       "IERC20": [
-        7172
+        7154
       ],
       "IERC20Metadata": [
-        7197
+        7179
       ],
       "Ownable": [
-        6508
+        6490
       ],
       "RacksToken": [
-        5211
+        5193
       ]
     },
-    "id": 5212,
+    "id": 5194,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 5190,
+        "id": 5172,
         "literals": [
           "solidity",
           "^",
@@ -7597,11 +7597,11 @@
       {
         "absolutePath": "project:/node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol",
         "file": "../node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol",
-        "id": 5191,
+        "id": 5173,
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
-        "scope": 5212,
-        "sourceUnit": 7095,
+        "scope": 5194,
+        "sourceUnit": 7077,
         "src": "60:71:25",
         "symbolAliases": [],
         "unitAlias": ""
@@ -7609,11 +7609,11 @@
       {
         "absolutePath": "project:/node_modules/@openzeppelin/contracts/access/Ownable.sol",
         "file": "../node_modules/@openzeppelin/contracts/access/Ownable.sol",
-        "id": 5192,
+        "id": 5174,
         "nameLocation": "-1:-1:-1",
         "nodeType": "ImportDirective",
-        "scope": 5212,
-        "sourceUnit": 6509,
+        "scope": 5194,
+        "sourceUnit": 6491,
         "src": "133:68:25",
         "symbolAliases": [],
         "unitAlias": ""
@@ -7625,7 +7625,7 @@
             "arguments": [
               {
                 "hexValue": "5261636b7320546f6b656e",
-                "id": 5195,
+                "id": 5177,
                 "isConstant": false,
                 "isLValue": false,
                 "isPure": true,
@@ -7641,7 +7641,7 @@
               },
               {
                 "hexValue": "52434b",
-                "id": 5196,
+                "id": 5178,
                 "isConstant": false,
                 "isLValue": false,
                 "isPure": true,
@@ -7657,13 +7657,13 @@
               }
             ],
             "baseName": {
-              "id": 5194,
+              "id": 5176,
               "name": "ERC20",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 7094,
+              "referencedDeclaration": 7076,
               "src": "287:5:25"
             },
-            "id": 5197,
+            "id": 5179,
             "nodeType": "InheritanceSpecifier",
             "src": "287:27:25"
           }
@@ -7672,19 +7672,19 @@
         "contractDependencies": [],
         "contractKind": "contract",
         "documentation": {
-          "id": 5193,
+          "id": 5175,
           "nodeType": "StructuredDocumentation",
           "src": "205:57:25",
           "text": "This is a representation of the RacksToken."
         },
         "fullyImplemented": true,
-        "id": 5211,
+        "id": 5193,
         "linearizedBaseContracts": [
-          5211,
-          7094,
-          7197,
-          7172,
-          8910
+          5193,
+          7076,
+          7179,
+          7154,
+          8892
         ],
         "name": "RacksToken",
         "nameLocation": "273:10:25",
@@ -7692,7 +7692,7 @@
         "nodes": [
           {
             "body": {
-              "id": 5209,
+              "id": 5191,
               "nodeType": "Block",
               "src": "415:55:25",
               "statements": [
@@ -7700,11 +7700,11 @@
                   "expression": {
                     "arguments": [
                       {
-                        "id": 5205,
+                        "id": 5187,
                         "name": "_to",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5199,
+                        "referencedDeclaration": 5181,
                         "src": "433:3:25",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -7712,11 +7712,11 @@
                         }
                       },
                       {
-                        "id": 5206,
+                        "id": 5188,
                         "name": "_amount",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 5201,
+                        "referencedDeclaration": 5183,
                         "src": "438:7:25",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -7735,18 +7735,18 @@
                           "typeString": "uint256"
                         }
                       ],
-                      "id": 5204,
+                      "id": 5186,
                       "name": "_mint",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 6911,
+                      "referencedDeclaration": 6893,
                       "src": "427:5:25",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_uint256_$returns$__$",
                         "typeString": "function (address,uint256)"
                       }
                     },
-                    "id": 5207,
+                    "id": 5189,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -7761,14 +7761,14 @@
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 5208,
+                  "id": 5190,
                   "nodeType": "ExpressionStatement",
                   "src": "427:19:25"
                 }
               ]
             },
             "functionSelector": "40c10f19",
-            "id": 5210,
+            "id": 5192,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -7776,17 +7776,17 @@
             "nameLocation": "373:4:25",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 5202,
+              "id": 5184,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 5199,
+                  "id": 5181,
                   "mutability": "mutable",
                   "name": "_to",
                   "nameLocation": "386:3:25",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5210,
+                  "scope": 5192,
                   "src": "378:11:25",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -7795,7 +7795,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 5198,
+                    "id": 5180,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "378:7:25",
@@ -7809,12 +7809,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 5201,
+                  "id": 5183,
                   "mutability": "mutable",
                   "name": "_amount",
                   "nameLocation": "399:7:25",
                   "nodeType": "VariableDeclaration",
-                  "scope": 5210,
+                  "scope": 5192,
                   "src": "391:15:25",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -7823,7 +7823,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 5200,
+                    "id": 5182,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "391:7:25",
@@ -7838,19 +7838,19 @@
               "src": "377:30:25"
             },
             "returnParameters": {
-              "id": 5203,
+              "id": 5185,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "415:0:25"
             },
-            "scope": 5211,
+            "scope": 5193,
             "src": "364:106:25",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "public"
           }
         ],
-        "scope": 5212,
+        "scope": 5194,
         "src": "264:209:25",
         "usedErrors": []
       }
@@ -7863,7 +7863,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.3",
-  "updatedAt": "2022-07-20T12:34:47.282Z",
+  "updatedAt": "2022-07-21T21:15:23.700Z",
   "devdoc": {
     "kind": "dev",
     "methods": {

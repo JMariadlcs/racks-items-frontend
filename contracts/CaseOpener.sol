@@ -2,15 +2,13 @@
 pragma solidity ^0.8.0;
 import "./IRacksItems.sol";
 import "./ICaseOpener.sol";
-import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";   
-import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol"; 
+import "../node_modules/@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";   
+import "../node_modules/@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol"; 
 // 0xbd13f08b8352A3635218ab9418E340c60d6Eb418
 // 0x121a143066e0f2f08b620784af77cccb35c6242460b4a8ee251b4b416abaebd4
 contract CaseOpener is ICaseOpener , VRFConsumerBaseV2{
 
-
-    uint256 [] public s_randomWords;
-    uint256 s_requestId;
+   
     IRacksItems RacksItems;
     VRFCoordinatorV2Interface public immutable i_vrfCoordinator; 
     bytes32 public immutable i_gasLane;
@@ -27,7 +25,7 @@ contract CaseOpener is ICaseOpener , VRFConsumerBaseV2{
         _;
     }
     function setAddress(address _racksItems) public{
-      RacksItems = IRacksItems(_racksItems);
+        RacksItems = IRacksItems(_racksItems);
     }
     constructor(address _racksItems,address vrfCoordinatorV2, bytes32 gasLane, uint64 subscriptionId, uint32 callbackGasLimit)VRFConsumerBaseV2(vrfCoordinatorV2){
         RacksItems = IRacksItems(_racksItems);
@@ -47,28 +45,10 @@ contract CaseOpener is ICaseOpener , VRFConsumerBaseV2{
 
     function _generate(address user) external override notForUsers{ 
 
-        uint requestId = _randomNumber();
+        uint requestId = i_vrfCoordinator.requestRandomWords(i_gasLane, i_subscriptionId, REQUEST_CONFIRMATIONS, i_callbackGasLimit, NUM_WORDS);
         s_requestIdOfUser[requestId] = user;
 
-        // uint caseSupply;
-        // uint256 [] memory itemList = RacksItems.caseLiquidity();
-        // for(uint i =0 ;i<itemList.length; i++){
-        //   caseSupply+=RacksItems.supplyOfItem(itemList[i]);
-        // }
-        // _randomNumber();
-        // uint256 randomNumber = s_randomWord  % caseSupply;
-        // uint256 totalCount = 0;
-        // uint256 item;
-
-        // for(uint256 i = 0 ; i < itemList.length; i++) {
-        //   uint256 _newTotalCount = totalCount + RacksItems.supplyOfItem(itemList[i]) ;
-        //   if(randomNumber > _newTotalCount) {
-        //     totalCount = _newTotalCount;
-        //   }else {
-        //     item = itemList[i];
-        //     break;
-        //   }
-        // }
+        
        
        
     }
@@ -82,36 +62,8 @@ contract CaseOpener is ICaseOpener , VRFConsumerBaseV2{
 
     function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) internal override {
         address recipient = s_requestIdOfUser[requestId];
-        uint caseSupply;
-        uint256 [] memory itemList = RacksItems.caseLiquidity();
-        for(uint i =0 ;i<itemList.length; i++){
-          caseSupply+=RacksItems.supplyOfItem(itemList[i]);
-        }
-
-        uint256 randomNumber = s_randomWords[0]  % caseSupply;
-        uint256 totalCount = 0;
-        uint256 item;
-
-        for(uint256 i = 0 ; i < itemList.length; i++) {
-          uint256 _newTotalCount = totalCount + RacksItems.supplyOfItem(itemList[i]) ;
-          if(randomNumber > _newTotalCount) {
-            totalCount = _newTotalCount;
-          }else {
-            item = itemList[i];
-            break;
-          }
-        }
-        RacksItems.fullfillCaseRequest(recipient, item); 
+        uint randomNumber = randomWords[0];
+        RacksItems.fulfillCaseRequest(recipient, randomNumber); 
     }
 
-    /**
-    * @notice Function to actually pick a winner 
-    * @dev 
-    * - randomWords -> array of randomWords
-    */
-
-    function _randomNumber() internal returns(uint256) {
-        uint256 s_requestedNumber = i_vrfCoordinator.requestRandomWords(i_gasLane, i_subscriptionId, REQUEST_CONFIRMATIONS, i_callbackGasLimit, NUM_WORDS);
-        return s_requestedNumber;
-    }
 }

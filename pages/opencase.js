@@ -147,11 +147,13 @@ export default function Opencase() {
         let gotItem
 
         marketContract.on("CaseOpened", async (user, casePrice, item) =>  {
-          gotItem = item.toNumber();
-          setItem(gotItem)
-          setProcessing(false)
-          await renderItemData(gotItem)
-          setProcessingPhase("")
+          if(user == userAddress){
+            gotItem = item.toNumber();
+            setItem(gotItem)
+            setProcessing(false)
+            await renderItemData(gotItem)
+            setProcessingPhase("")
+          }
 
         });
   

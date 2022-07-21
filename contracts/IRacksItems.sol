@@ -30,8 +30,8 @@ interface IRacksItems {
     event ticketClaimedBack( address realOwner);
 
     function openCase() external returns(bool success);
-    
-    function fullfillCaseRequest(address user, uint item) external;
+
+    function fulfillCaseRequest(address _user,  uint _randomNumber) external;
 
     function caseLiquidity() external view returns(uint256[] memory);
 

@@ -4,11 +4,11 @@ pragma solidity ^0.8.0;
 import "./ICaseOpener.sol";
 import "./IRacksItems.sol";
 import "./ITickets.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol"; 
-import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol"; 
-import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol"; 
-import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol"; 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol"; 
+import "../node_modules/@openzeppelin/contracts/access/AccessControl.sol"; 
+import "../node_modules/@openzeppelin/contracts/token/ERC1155/ERC1155.sol"; 
+import "../node_modules/@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol"; 
+import "../node_modules/@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol"; 
+import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol"; 
 
 contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{ 
    
@@ -143,9 +143,28 @@ contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{
     }
 
 
-    function fullfillCaseRequest(address user, uint item) external override{
+    function fulfillCaseRequest(address _user, uint _randomNumber) external override{
         require(msg.sender == address (CASE_OPENER));
-        _safeTransferFrom(address(this), user ,  item , 1,"");
+
+        uint caseSupply;
+        uint256 [] memory itemList = caseLiquidity();
+        for(uint i =0 ;i<itemList.length; i++){
+          caseSupply+=supplyOfItem(itemList[i]);
+        }
+        uint randomNumber = _randomNumber % caseSupply;
+        uint256 totalCount = 0;
+        uint256 item;
+
+        for(uint256 i = 0 ; i < itemList.length; i++) {
+          uint256 _newTotalCount = totalCount + supplyOfItem(itemList[i]) ;
+          if(randomNumber > _newTotalCount) {
+            totalCount = _newTotalCount;
+          }else {
+            item = itemList[i];
+            break;
+          }
+        }
+        _safeTransferFrom(address(this), _user ,  item , 1,"");
         emit CaseOpened(msg.sender, casePrice, item);
 
     }

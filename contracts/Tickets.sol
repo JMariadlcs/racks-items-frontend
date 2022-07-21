@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 import "./ITickets.sol";
 import "./IRacksItems.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol"; 
+import "../node_modules/@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol"; 
 
 contract Tickets is ITickets{
 
