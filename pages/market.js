@@ -73,6 +73,7 @@ export default function Market() {
           owner
         }
         
+        
         return item
       }))
       setItems(items)

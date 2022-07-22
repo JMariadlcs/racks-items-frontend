@@ -30,14 +30,14 @@ contract Tickets is ITickets{
     }
 
     
-    function _listT(address from ,uint256 numTries, uint256 _hours, uint256 price, address user) external notForUsers  override{
+    function listTicket(address from ,uint256 numTries, uint256 _hours, uint256 price, address user) external notForUsers  override{
         if(from!=user){
             require(ticketAllowance(from, user));
         }
 
-        require(!s_isSellingTicket[from], "User is already currently selling a Ticket");
-        if(s_hadTicket[from]) {
-            require(s_hasTicket[from] , "User has not ticket avaliable");
+        require(!s_isSellingTicket[user], "User is already currently selling a Ticket");
+        if(s_hadTicket[user]) {
+            require(s_hasTicket[user] , "User has not ticket avaliable");
         }
         bool success = _lockMrCrypto(from);
         require(success,"Sorry, you already have a Mr Crypto on use.");
@@ -47,7 +47,7 @@ contract Tickets is ITickets{
         numTries,
         _hours,
         price,
-        from,
+        user,
         0,
         true
         ));
@@ -59,27 +59,27 @@ contract Tickets is ITickets{
         s_hasTicket[from] = false;
     }
 
-    function _unlistT(address from, address user) external notForUsers override{
+    function unListTicket(address from, address user) external notForUsers override{
         if(from!=user){
             require(ticketAllowance(from, user));
         }
         
-        uint ticketId = s_lastTicket[from];
-        require(s_isSellingTicket[from], "User is not currently selling a Ticket");
-        require(_tickets[ticketId].owner == from, "User is not owner of this ticket");
+        uint ticketId = s_lastTicket[user];
+        require(s_isSellingTicket[user], "User is not currently selling a Ticket");
+        require(_tickets[ticketId].owner == user, "User is not owner of this ticket");
         _tickets[ticketId].isAvaliable = false;
-        s_isSellingTicket[from] = false;
-        s_hasTicket[from] = true;
+        s_isSellingTicket[user] = false;
+        s_hasTicket[user] = true;
         _unlockMrCrypto(from);
      
     }
 
-    function _changeT(address from , uint256 newTries, uint256 newHours, uint256 newPrice, address user) external notForUsers override{
+    function changeTicketConditions(address from , uint256 newTries, uint256 newHours, uint256 newPrice, address user) external notForUsers override{
         if(from!=user){
             require(ticketAllowance(from,user));
         }
-        uint ticketId = s_lastTicket[from];
-        require(s_isSellingTicket[from], "User is not currently selling a Ticket");
+        uint ticketId = s_lastTicket[user];
+        require(s_isSellingTicket[user], "User is not currently selling a Ticket");
         require(_tickets[ticketId].owner == user, "User is not owner of this ticket");
         _tickets[ticketId].price = newPrice;
         _tickets[ticketId].duration = newHours;
@@ -87,7 +87,7 @@ contract Tickets is ITickets{
      
     }
 
-    function _buyT(uint256 ticketId, address user) external notForUsers override{
+    function buyTicket(uint256 ticketId, address user) external notForUsers override{
 
         require(RacksItems.isVip(user)==false, "A VIP user can not buy a ticket");
         require(_tickets[ticketId].owner != user, "You can not buy a ticket to your self");
@@ -111,17 +111,17 @@ contract Tickets is ITickets{
     * - Emit event
     */
 
-    function _claimT(address from , address user) external notForUsers override{
+    function claimTicketBack(address from , address user) external notForUsers override{
         if(from!=user){
             require(ticketAllowance(from,user));
         }
-        uint ticketId = s_lastTicket[from];
-        require(s_ticketIsLended[from], "User did not sell any Ticket");
+        uint ticketId = s_lastTicket[user];
+        require(s_ticketIsLended[user], "User did not sell any Ticket");
         require((_tickets[ticketId].numTries == 0) || (((block.timestamp - _tickets[ticketId].timeWhenSold)/60) >= (_tickets[ticketId].duration * 60)), "Duration of the Ticket or numTries is still avaliable");
         s_hasTicket[_tickets[ticketId].owner] = false;
-        s_hasTicket[from] = true;
-        s_ticketIsLended[from] = false;
-        _unlockMrCrypto(user);
+        s_hasTicket[user] = true;
+        s_ticketIsLended[user] = false;
+        _unlockMrCrypto(from);
   
     }
 
@@ -131,7 +131,7 @@ contract Tickets is ITickets{
     *        - If so: decrease numTries, update Avaliability and mappings
     */
 
-    function _decreaseT(address user) external notForUsers override {
+    function decreaseTicketTries(address user) external notForUsers override {
         uint ticketId = s_lastTicket[user];
         if(_tickets[ticketId].numTries != 1) { // Case it was not the last try avaliable
             _tickets[ticketId].numTries--;
@@ -200,7 +200,7 @@ contract Tickets is ITickets{
    
 
 
-    function _approveT(address owner, address spender, bool permission) external notForUsers override {
+    function approveTicket(address owner, address spender, bool permission) external notForUsers override {
       ticketApprovals[owner][spender]=permission;
     }
 
@@ -299,7 +299,7 @@ contract Tickets is ITickets{
         }
     }
 
-    //Returns current ticket count.
+      
     function getTicketCount() public override view returns(uint256) {
       return s_ticketCount;
     }

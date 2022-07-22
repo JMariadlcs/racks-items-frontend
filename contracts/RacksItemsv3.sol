@@ -404,7 +404,7 @@ contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{
     *
     */
     function listTicketFrom(address from, uint256 numTries, uint256 _hours, uint256 price) public override onlyVIP contractIsActive  {
-        TICKETS._listT(from,numTries, _hours , price, msg.sender);
+        TICKETS.listTicket(from,numTries, _hours , price, msg.sender);
         emit newTicketOnSale(from, numTries, _hours, price);
     }
 
@@ -415,7 +415,7 @@ contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{
     * - Emit event
     */
     function unListTicketFrom(address from) public override onlyVIP contractIsActive  {
-        TICKETS._unlistT(from, msg.sender);
+        TICKETS.unListTicket(from, msg.sender);
         emit unListTicketOnSale(from);
     }
 
@@ -426,7 +426,7 @@ contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{
     * - Emit event
     */
     function changeTicketConditionsFrom(address from, uint256 newTries, uint256 newHours, uint256 newPrice) public override onlyVIP contractIsActive {
-        TICKETS._changeT(from, newTries,  newHours,  newPrice, msg.sender);
+        TICKETS.changeTicketConditions(from, newTries,  newHours,  newPrice, msg.sender);
         emit ticketConditionsChanged(from, newTries, newHours, newPrice);
     }
 
@@ -454,7 +454,7 @@ contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{
     * - Emit event
     */
     function claimTicketBackFrom(address from) public override onlyVIP {
-        TICKETS._claimT(from, msg.sender);
+        TICKETS.claimTicketBack(from, msg.sender);
         emit ticketClaimedBack( from);
     }
 
@@ -470,7 +470,7 @@ contract RacksItemsv3 is IRacksItems, ERC1155, ERC1155Holder, AccessControl{
     
     function approveForTickets( address spender, bool permission) public override {
       require(MR_CRYPTO.balanceOf(msg.sender)>0,"You are not VIP user");
-      TICKETS._approveT(msg.sender, spender, permission);
+      TICKETS.approveTicket(msg.sender, spender, permission);
     }
 
     function ticketAllowance(address owner, address spender) public override view returns(bool){
